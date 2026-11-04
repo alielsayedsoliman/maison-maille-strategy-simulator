@@ -43,7 +43,7 @@
     .panel-copy { margin: 0 0 22px; color: var(--muted); font-size: 11px; line-height: 1.7; }
     label { display: block; margin: 13px 0 6px; color: var(--ink-soft); font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
     input { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 4px; background: #fff; color: var(--ink); font-size: 12px; }
-    .button { min-height: 43px; padding: 0 17px; border: 1px solid #1C1A16; border-radius: 4px; background: #1C1A16; color: #FFF8E9; font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+    .button { min-height: 43px; padding: 0 17px; border: 1px solid #1C1A16; border-radius: 4px; background: #1C1A16; color: #FFF8E9; font-size: 9px; font-weight: 900; letter-spacing: .12em; }
     .button:hover { background: #393229; }
     .button:disabled { cursor: wait; opacity: .6; }
     .login-submit { width: 100%; margin-top: 18px; }
@@ -109,7 +109,7 @@
   <main class="shell">
     <p class="eyebrow">Maison Maille · Strategy competition</p>
     <h1>The Strategy Rankings.</h1>
-    <p class="intro">This page is restricted to the designated administrator account. Participant submissions are recorded through the simulator; leaderboard data is retrieved only after administrator sign-in.</p>
+    <p class="intro">This page is restricted to the designated administrator account. Participant submissions are recorded through the simulator; leaderboard data is retrieved only after administrator authentication.</p>
 
     <section class="panel login-panel" id="login-panel" aria-labelledby="login-title">
       <h2 id="login-title">Administrator sign-in</h2>
@@ -355,14 +355,21 @@
         showLogin('Supabase JS failed to load. Check your internet connection and refresh.');
         return;
       }
-      if (
-        SUPABASE_URL === 'https://kabxnkhkpvowebwzpgmv.supabase.co' ||
-        SUPABASE_PUBLISHABLE_KEY === 'sb_publishable_kR4bB1jQYpL_4BrKdbwe3g_ugCHB1qN' ||
-        LEADERBOARD_ADMIN_EMAIL === 'ali@gmail.com'
-      ) {
+
+      const hasValidSupabaseConfig =
+        typeof SUPABASE_URL === 'string' &&
+        SUPABASE_URL.trim().startsWith('https://') &&
+        typeof SUPABASE_PUBLISHABLE_KEY === 'string' &&
+        SUPABASE_PUBLISHABLE_KEY.trim().startsWith('sb_') &&
+        typeof LEADERBOARD_ADMIN_EMAIL === 'string' &&
+        LEADERBOARD_ADMIN_EMAIL.trim().length > 0 &&
+        !LEADERBOARD_ADMIN_EMAIL.includes('YOUR_');
+
+      if (!hasValidSupabaseConfig) {
         showLogin('Setup required: add your Supabase URL, publishable key, and administrator email in this file.');
         return;
       }
+
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
         auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false }
       });
