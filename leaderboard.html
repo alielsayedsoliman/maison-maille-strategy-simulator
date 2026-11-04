@@ -158,9 +158,9 @@
   <script>
     // Fill these placeholders. The publishable key is designed for browser use;
     // do not put a Supabase secret/service_role key in this file.
-    const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
-    const SUPABASE_PUBLISHABLE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
-    const LEADERBOARD_ADMIN_EMAIL = 'YOUR_ADMIN_EMAIL@example.com';
+    const SUPABASE_URL = 'https://kabxnkhkpvowebwzpgmv.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_kR4bB1jQYpL_4BrKdbwe3g_ugCHB1qN';
+    const LEADERBOARD_ADMIN_EMAIL = 'ali@gmail.com';
 
     const $ = (id) => document.getElementById(id);
     let supabaseClient = null;
@@ -356,9 +356,9 @@
         return;
       }
       if (
-        SUPABASE_URL === 'YOUR_SUPABASE_PROJECT_URL' ||
-        SUPABASE_PUBLISHABLE_KEY === 'YOUR_SUPABASE_PUBLISHABLE_KEY' ||
-        LEADERBOARD_ADMIN_EMAIL === 'YOUR_ADMIN_EMAIL@example.com'
+        SUPABASE_URL === 'https://kabxnkhkpvowebwzpgmv.supabase.co' ||
+        SUPABASE_PUBLISHABLE_KEY === 'sb_publishable_kR4bB1jQYpL_4BrKdbwe3g_ugCHB1qN' ||
+        LEADERBOARD_ADMIN_EMAIL === 'ali@gmail.com'
       ) {
         showLogin('Setup required: add your Supabase URL, publishable key, and administrator email in this file.');
         return;
