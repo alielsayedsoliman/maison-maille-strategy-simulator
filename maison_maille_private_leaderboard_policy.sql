@@ -34,7 +34,7 @@ ON public.simulation_results
 FOR SELECT
 TO authenticated
 USING (
-  lower(coalesce(auth.jwt() ->> 'email', '')) = lower('REPLACE_WITH_ADMIN_EMAIL')
+  lower(coalesce(auth.jwt() ->> 'email', '')) = lower('ali@gmail.com')
 );
 
 -- Keep public result submission working through the validated database RPC.
