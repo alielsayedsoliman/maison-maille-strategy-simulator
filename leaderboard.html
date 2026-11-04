@@ -358,12 +358,12 @@
 
       const hasValidSupabaseConfig =
         typeof SUPABASE_URL === 'string' &&
-        SUPABASE_URL.trim().startsWith('https://kabxnkhkpvowebwzpgmv.supabase.co') &&
+        SUPABASE_URL.trim().startsWith('https://') &&
         typeof SUPABASE_PUBLISHABLE_KEY === 'string' &&
-        SUPABASE_PUBLISHABLE_KEY.trim().startsWith('sb_publishable_kR4bB1jQYpL_4BrKdbwe3g_ugCHB1qN') &&
+        SUPABASE_PUBLISHABLE_KEY.trim().startsWith('sb_') &&
         typeof LEADERBOARD_ADMIN_EMAIL === 'string' &&
         LEADERBOARD_ADMIN_EMAIL.trim().length > 0 &&
-        !LEADERBOARD_ADMIN_EMAIL.includes('ali@gmail.com');
+        !LEADERBOARD_ADMIN_EMAIL.includes('YOUR_');
 
       if (!hasValidSupabaseConfig) {
         showLogin('Setup required: add your Supabase URL, publishable key, and administrator email in this file.');
