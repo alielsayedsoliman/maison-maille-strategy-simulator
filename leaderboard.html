@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="description" content="Private Maison Maille strategy simulation results." />
+  <title>Maison Maille — Private Strategy Rankings</title>
+  <style>
+    :root {
+      --ink: #29241C;
+      --ink-soft: #62594A;
+      --muted: #817663;
+      --line: #DED3BF;
+      --paper: #FBF8F1;
+      --background: #F5F0E3;
+      --brass: #755E33;
+      --wine: #6E0000;
+      --success: #3F7150;
+      --danger: #8A2924;
+      --shadow: 0 16px 45px rgba(28, 26, 22, .09);
+      --heading: "Iowan Old Style", "Baskerville", "Palatino Linotype", Georgia, serif;
+      --body: "Avenir Next", Avenir, "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--background); color: var(--ink); font-family: var(--body); }
+    button, input { font: inherit; }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+    .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    header { border-bottom: 1px solid rgba(117,94,51,.2); }
+    .topbar { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .brand { font: 700 20px var(--heading); letter-spacing: .16em; }
+    .brand small { display: block; margin-top: 4px; color: var(--brass); font: 800 8px var(--body); letter-spacing: .2em; }
+    .private-mark { color: var(--wine); font-size: 9px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+    main { padding: 46px 0 70px; }
+    .eyebrow { margin: 0 0 11px; color: var(--brass); font-size: 9px; font-weight: 900; letter-spacing: .22em; text-transform: uppercase; }
+    h1, h2, h3 { font-family: var(--heading); }
+    h1 { margin: 0; font-size: clamp(36px, 5vw, 57px); font-weight: 600; letter-spacing: -.04em; line-height: 1.03; }
+    .intro { max-width: 650px; margin: 14px 0 0; color: var(--ink-soft); font-size: 12px; line-height: 1.8; }
+    .panel { margin-top: 25px; padding: clamp(20px, 3vw, 30px); border: 1px solid var(--line); border-radius: 12px; background: var(--paper); box-shadow: var(--shadow); }
+    .login-panel { width: min(100%, 490px); }
+    .login-panel h2 { margin: 0 0 9px; font-size: 28px; font-weight: 600; }
+    .panel-copy { margin: 0 0 22px; color: var(--muted); font-size: 11px; line-height: 1.7; }
+    label { display: block; margin: 13px 0 6px; color: var(--ink-soft); font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    input { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 4px; background: #fff; color: var(--ink); font-size: 12px; }
+    .button { min-height: 43px; padding: 0 17px; border: 1px solid #1C1A16; border-radius: 4px; background: #1C1A16; color: #FFF8E9; font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+    .button:hover { background: #393229; }
+    .button:disabled { cursor: wait; opacity: .6; }
+    .login-submit { width: 100%; margin-top: 18px; }
+    .secondary { border-color: var(--line); background: transparent; color: var(--ink); }
+    .secondary:hover { background: #F0EBDD; }
+    .status { min-height: 18px; margin: 13px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .status.error { color: var(--danger); }
+    .status.success { color: var(--success); }
+    .hidden { display: none !important; }
+    .dashboard-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .dashboard-head h2 { margin: 0; font-size: 29px; }
+    .toolbar { display: flex; align-items: center; gap: 9px; }
+    .toolbar input { width: min(260px, 42vw); }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin: 18px 0; }
+    .stat { padding: 16px 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+    .stat span { display: block; color: var(--muted); font-size: 8px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .stat strong { display: block; margin-top: 6px; font: 600 29px var(--heading); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+    th { padding: 12px 11px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 8px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+    td { padding: 14px 11px; border-bottom: 1px solid #EAE3D7; color: var(--ink-soft); font-size: 11px; }
+    tr:last-child td { border-bottom: 0; }
+    td strong { color: var(--ink); }
+    .rank { display: inline-grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; background: #EEE4CC; color: var(--brass); font-weight: 900; }
+    .score { display: inline-block; padding: 5px 8px; border-radius: 3px; background: #EEE4CC; color: var(--brass); font-size: 9px; font-weight: 900; }
+    .detail-button { border: 0; background: transparent; color: var(--wine); font-size: 10px; font-weight: 900; cursor: pointer; }
+    .empty { padding: 38px 14px; text-align: center; color: var(--muted); font-size: 11px; }
+    .detail { margin-top: 18px; padding: 19px; border: 1px solid var(--line); border-radius: 8px; background: #F4EFE5; }
+    .detail h3 { margin: 0; font-size: 23px; }
+    .detail p { color: var(--muted); font-size: 10px; }
+    .detail-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin-top: 12px; }
+    .detail-item { padding: 11px; border: 1px solid var(--line); border-radius: 6px; background: white; }
+    .detail-item span { display: block; color: var(--muted); font-size: 8px; text-transform: uppercase; }
+    .detail-item strong { display: block; margin-top: 5px; font: 600 19px var(--heading); }
+    .decision-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin-top: 12px; }
+    .decision { padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+    .decision span { display: block; color: var(--muted); font-size: 8px; font-weight: 900; text-transform: uppercase; }
+    .decision strong { display: block; margin-top: 4px; font-size: 10px; line-height: 1.5; white-space: normal; }
+    footer { padding: 19px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; }
+    @media (max-width: 680px) {
+      .shell { width: calc(100% - 28px); }
+      main { padding-top: 32px; }
+      .topbar { min-height: 65px; }
+      .dashboard-head { align-items: flex-start; flex-direction: column; }
+      .toolbar { width: 100%; }
+      .toolbar input { width: 100%; }
+      .stats { gap: 7px; }
+      .stat { padding: 12px; }
+      .stat strong { font-size: 23px; }
+      .detail-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .decision-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell topbar">
+      <div class="brand">MAILLE<small>MAISON · DEPUIS 1747 · PARIS</small></div>
+      <div class="private-mark">Private administrator area</div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <p class="eyebrow">Maison Maille · Strategy competition</p>
+    <h1>The Strategy Rankings.</h1>
+    <p class="intro">This page is restricted to the designated administrator account. Participant submissions are recorded through the simulator; leaderboard data is retrieved only after administrator sign-in.</p>
+
+    <section class="panel login-panel" id="login-panel" aria-labelledby="login-title">
+      <h2 id="login-title">Administrator sign-in</h2>
+      <p class="panel-copy">Use the email address and password of the administrator account created in Supabase Authentication. There is no public registration on this page.</p>
+      <form id="login-form">
+        <label for="admin-email">Administrator email</label>
+        <input id="admin-email" type="email" autocomplete="username" required />
+        <label for="admin-password">Password</label>
+        <input id="admin-password" type="password" autocomplete="current-password" required />
+        <button class="button login-submit" id="login-button" type="submit">Sign in securely</button>
+      </form>
+      <p class="status" id="login-status" role="status" aria-live="polite">Sign in to view participant rankings.</p>
+    </section>
+
+    <section id="dashboard" class="hidden" aria-labelledby="dashboard-title">
+      <div class="dashboard-head">
+        <div><p class="eyebrow">Authorized access</p><h2 id="dashboard-title">Participant leaderboard</h2></div>
+        <div class="toolbar">
+          <input id="search" type="search" placeholder="Search participants" aria-label="Search participants" />
+          <button class="button secondary" id="refresh" type="button">Refresh</button>
+          <button class="button secondary" id="sign-out" type="button">Sign out</button>
+        </div>
+      </div>
+      <div class="stats" aria-label="Competition statistics">
+        <article class="stat"><span>Participants</span><strong id="participant-count">0</strong></article>
+        <article class="stat"><span>Average score</span><strong id="average-score">—</strong></article>
+        <article class="stat"><span>Perfect scores</span><strong id="perfect-count">0</strong></article>
+      </div>
+      <section class="panel">
+        <p class="status" id="data-status" role="status" aria-live="polite">Loading private results…</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Rank</th><th>Participant</th><th>Score</th><th>Optimal decisions</th><th>Category growth</th><th>Prestige</th><th>Details</th></tr></thead>
+            <tbody id="leaderboard-body"></tbody>
+          </table>
+        </div>
+        <div class="empty hidden" id="empty-state">No submissions found yet.</div>
+        <article class="detail hidden" id="participant-detail" aria-live="polite"></article>
+      </section>
+    </section>
+  </main>
+
+  <footer><div class="shell">MAILLE · Integrated Cases in Marketing · Private administrator dashboard</div></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Fill these placeholders. The publishable key is designed for browser use;
+    // do not put a Supabase secret/service_role key in this file.
+    const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+    const SUPABASE_PUBLISHABLE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
+    const LEADERBOARD_ADMIN_EMAIL = 'YOUR_ADMIN_EMAIL@example.com';
+
+    const $ = (id) => document.getElementById(id);
+    let supabaseClient = null;
+    let rows = [];
+
+    function setStatus(id, message, type = '') {
+      const element = $(id);
+      element.textContent = message;
+      element.className = `status${type ? ` ${type}` : ''}`;
+    }
+
+    function setBusy(isBusy) {
+      $('login-button').disabled = isBusy;
+      $('login-button').textContent = isBusy ? 'Signing in…' : 'Sign in securely';
+    }
+
+    function isAdminEmail(email) {
+      return String(email || '').trim().toLowerCase() === LEADERBOARD_ADMIN_EMAIL.trim().toLowerCase();
+    }
+
+    function showDashboard() {
+      $('login-panel').classList.add('hidden');
+      $('dashboard').classList.remove('hidden');
+      loadResults();
+    }
+
+    function showLogin(message = 'Sign in to view participant rankings.') {
+      $('dashboard').classList.add('hidden');
+      $('login-panel').classList.remove('hidden');
+      setStatus('login-status', message);
+    }
+
+    async function loadResults() {
+      setStatus('data-status', 'Loading the latest participant results…');
+      try {
+        const { data, error } = await supabaseClient
+          .from('simulation_results')
+          .select('id, participant_name, score, prestige, under_40_foodies, core_50_loyalty, category_growth, decisions, completed_at')
+          .order('score', { ascending: false })
+          .order('category_growth', { ascending: false })
+          .order('prestige', { ascending: false })
+          .order('completed_at', { ascending: true })
+          .limit(250);
+        if (error) throw error;
+        rows = Array.isArray(data) ? data : [];
+        setStatus('data-status', `${rows.length} participant result${rows.length === 1 ? '' : 's'} loaded.`, 'success');
+        renderRows();
+      } catch (error) {
+        setStatus('data-status', `Could not load private results: ${error.message || 'Please try again.'}`, 'error');
+      }
+    }
+
+    function renderRows() {
+      const query = $('search').value.trim().toLowerCase();
+      const visible = rows.filter(row => String(row.participant_name || '').toLowerCase().includes(query));
+      const average = rows.length ? rows.reduce((sum, row) => sum + Number(row.score || 0), 0) / rows.length : null;
+      $('participant-count').textContent = String(rows.length);
+      $('average-score').textContent = average === null ? '—' : `${average.toFixed(1)}/4`;
+      $('perfect-count').textContent = String(rows.filter(row => Number(row.score) === 4).length);
+
+      const body = $('leaderboard-body');
+      body.replaceChildren();
+      $('empty-state').classList.toggle('hidden', visible.length > 0);
+      visible.forEach((row, index) => {
+        const tr = document.createElement('tr');
+        const rankCell = document.createElement('td');
+        const rank = document.createElement('span');
+        rank.className = 'rank';
+        rank.textContent = String(index + 1);
+        rankCell.append(rank);
+        tr.append(rankCell);
+
+        const nameCell = document.createElement('td');
+        const name = document.createElement('strong');
+        name.textContent = row.participant_name || 'Participant';
+        nameCell.append(name);
+        tr.append(nameCell);
+
+        const scoreCell = document.createElement('td');
+        const score = document.createElement('span');
+        score.className = 'score';
+        score.textContent = `${Number(row.score || 0)}/4`;
+        scoreCell.append(score);
+        tr.append(scoreCell);
+
+        const cells = [
+          `${Number(row.score || 0)} of 4`,
+          `${Number(row.category_growth || 0) > 0 ? '+' : ''}${Number(row.category_growth || 0).toFixed(1)}%/yr`,
+          `${Number(row.prestige || 0)}%`
+        ];
+        cells.forEach(value => {
+          const td = document.createElement('td');
+          td.textContent = value;
+          tr.append(td);
+        });
+
+        const actionCell = document.createElement('td');
+        const detailButton = document.createElement('button');
+        detailButton.type = 'button';
+        detailButton.className = 'detail-button';
+        detailButton.textContent = 'View details →';
+        detailButton.addEventListener('click', () => showParticipantDetail(row));
+        actionCell.append(detailButton);
+        tr.append(actionCell);
+        body.append(tr);
+      });
+    }
+
+    function showParticipantDetail(row) {
+      const panel = $('participant-detail');
+      panel.replaceChildren();
+      const heading = document.createElement('h3');
+      heading.textContent = row.participant_name || 'Participant';
+      const summary = document.createElement('p');
+      summary.textContent = `Final score: ${Number(row.score || 0)}/4 · Completed ${row.completed_at ? new Date(row.completed_at).toLocaleString() : 'date unavailable'}`;
+      panel.append(heading, summary);
+
+      const metrics = document.createElement('div');
+      metrics.className = 'detail-grid';
+      [
+        ['Masstige prestige', `${Number(row.prestige || 0)}%`],
+        ['Under-40 foodies', `${Number(row.under_40_foodies || 0)}%`],
+        ['50+ core loyalty', `${Number(row.core_50_loyalty || 0)}%`],
+        ['Category growth', `${Number(row.category_growth || 0) > 0 ? '+' : ''}${Number(row.category_growth || 0).toFixed(1)}%/yr`]
+      ].forEach(([label, value]) => {
+        const item = document.createElement('div');
+        item.className = 'detail-item';
+        const caption = document.createElement('span');
+        caption.textContent = label;
+        const result = document.createElement('strong');
+        result.textContent = value;
+        item.append(caption, result);
+        metrics.append(item);
+      });
+      panel.append(metrics);
+
+      const decisions = document.createElement('div');
+      decisions.className = 'decision-list';
+      (Array.isArray(row.decisions) ? row.decisions : []).forEach(decision => {
+        const item = document.createElement('div');
+        item.className = 'decision';
+        const round = document.createElement('span');
+        round.textContent = `Round ${decision.round_number || decision.roundNumber || ''} · ${decision.choice_id || decision.choiceId || ''}`;
+        const choice = document.createElement('strong');
+        choice.textContent = decision.choice_title || decision.choiceTitle || decision.concept || 'Decision recorded';
+        item.append(round, choice);
+        decisions.append(item);
+      });
+      if (decisions.children.length) panel.append(decisions);
+      panel.classList.remove('hidden');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    $('login-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const email = $('admin-email').value.trim();
+      const password = $('admin-password').value;
+      if (!isAdminEmail(email)) {
+        setStatus('login-status', 'This email is not authorized to view the leaderboard.', 'error');
+        return;
+      }
+      setBusy(true);
+      setStatus('login-status', 'Checking administrator credentials…');
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        if (!isAdminEmail(data.user?.email)) {
+          await supabaseClient.auth.signOut();
+          throw new Error('This account is not authorized to view the leaderboard.');
+        }
+        $('admin-password').value = '';
+        showDashboard();
+      } catch (error) {
+        setStatus('login-status', error.message || 'Sign-in failed. Check your credentials.', 'error');
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    $('refresh').addEventListener('click', loadResults);
+    $('search').addEventListener('input', renderRows);
+    $('sign-out').addEventListener('click', async () => {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) setStatus('data-status', error.message, 'error');
+      rows = [];
+      $('participant-detail').classList.add('hidden');
+      showLogin('You have signed out.');
+    });
+
+    async function initialize() {
+      if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+        showLogin('Supabase JS failed to load. Check your internet connection and refresh.');
+        return;
+      }
+      if (
+        SUPABASE_URL === 'YOUR_SUPABASE_PROJECT_URL' ||
+        SUPABASE_PUBLISHABLE_KEY === 'YOUR_SUPABASE_PUBLISHABLE_KEY' ||
+        LEADERBOARD_ADMIN_EMAIL === 'YOUR_ADMIN_EMAIL@example.com'
+      ) {
+        showLogin('Setup required: add your Supabase URL, publishable key, and administrator email in this file.');
+        return;
+      }
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false }
+      });
+      try {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error) throw error;
+        if (data.session?.user && isAdminEmail(data.session.user.email)) {
+          showDashboard();
+          return;
+        }
+        if (data.session) await supabaseClient.auth.signOut();
+      } catch (error) {
+        showLogin(`Authentication check failed: ${error.message || 'Please sign in again.'}`);
+        return;
+      }
+      showLogin();
+    }
+
+    initialize();
+  </script>
+</body>
+</html>

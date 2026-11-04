@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="An interactive Maison Maille brand positioning and transgenerational strategy simulation." />
+  <title>Maison Maille — The Strategy Room</title>
+  <style>
+    :root {
+      --site-primary: #1C1A16;
+      --site-secondary: #755E33;
+      --site-background: #F5F0E3;
+      --site-on-primary: #FFF8E9;
+      --site-on-secondary: #FFF8E9;
+      --site-on-background: #29241C;
+      --site-font-body: "Avenir Next", Avenir, "Segoe UI", Arial, sans-serif;
+      --site-font-heading: "Iowan Old Style", "Baskerville", "Palatino Linotype", Georgia, serif;
+      --site-heading-scale: 1;
+      --site-spacing-scale: 1;
+      --site-radius-scale: 1;
+      --site-decoration-opacity: 1;
+
+      --ink: #29241C;
+      --ink-soft: #62594A;
+      --muted: #817663;
+      --line: #DED3BF;
+      --paper: #FBF8F1;
+      --paper-deep: #E7D9A8;
+      --olive: #1C1A16;
+      --olive-light: #393229;
+      --brass: #755E33;
+      --brass-light: #FFCE84;
+      --wine: #6E0000;
+      --success: #3F7150;
+      --success-bg: #E8F0E8;
+      --risk: #6E0000;
+      --risk-bg: #F4E6E3;
+      --shadow-soft: 0 16px 45px rgba(28, 26, 22, .09);
+      --shadow-card: 0 8px 24px rgba(28, 26, 22, .065);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--site-font-body);
+      background: var(--site-background);
+    }
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; }
+    [hidden] { display: none !important; }
+
+    .entry-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(245, 240, 227, .98);
+      backdrop-filter: blur(12px);
+    }
+    .entry-card {
+      width: min(100%, 520px);
+      padding: clamp(25px, 5vw, 44px);
+      border: 1px solid #D8C28E;
+      border-radius: 12px;
+      background: var(--paper);
+      box-shadow: var(--shadow-soft);
+    }
+    .entry-brand { color: var(--brass); font-family: var(--site-font-heading); font-size: 14px; font-weight: 700; letter-spacing: .17em; }
+    .entry-kicker { margin: 31px 0 9px; color: var(--brass); font-size: 9px; font-weight: 900; letter-spacing: .2em; }
+    .entry-card h2 { margin: 0; color: var(--ink); font-family: var(--site-font-heading); font-size: clamp(32px, 6vw, 46px); font-weight: 600; letter-spacing: -.035em; line-height: 1.08; }
+    .entry-description { margin: 14px 0 24px; color: var(--ink-soft); font-size: 12px; line-height: 1.75; }
+    .entry-form { display: grid; gap: 9px; }
+    .entry-form .primary-button { width: 100%; margin-top: 8px; }
+    .entry-status { min-height: 15px; margin: 0; color: var(--risk); font-size: 10px; }
+
+    .app-root {
+      min-height: 100vh;
+      width: 100%;
+      border-radius: 0;
+      color-scheme: light;
+      color: light-dark(var(--site-on-background), #F1EEE5);
+      background-color: light-dark(var(--site-background), #181613);
+      overflow: clip;
+      isolation: isolate;
+    }
+
+    .site-header {
+      position: relative;
+      overflow: hidden;
+      background: var(--site-background);
+      color: var(--site-on-background);
+    }
+    .site-header::before,
+    .site-header::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+      opacity: var(--site-decoration-opacity);
+    }
+    .site-header::before {
+      width: 560px;
+      height: 560px;
+      border: 1px solid rgba(117, 94, 51, .16);
+      border-radius: 50%;
+      right: -145px;
+      top: -315px;
+      box-shadow: 0 0 0 35px rgba(117, 94, 51, .035), 0 0 0 72px rgba(117, 94, 51, .025);
+    }
+    .site-header::after {
+      width: 390px;
+      height: 390px;
+      border: 1px solid rgba(117, 94, 51, .12);
+      border-radius: 50%;
+      left: -250px;
+      bottom: -300px;
+    }
+    .header-inner, .metrics-inner, .page-content, .footer-inner {
+      width: min(1180px, calc(100% - 48px));
+      margin-inline: auto;
+    }
+    .topbar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: calc(16px * var(--site-spacing-scale));
+      min-height: 78px;
+      border-bottom: 1px solid rgba(117, 94, 51, .2);
+    }
+    .brand-lockup { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand-mark {
+      width: 44px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: var(--brass);
+      font-family: var(--site-font-heading);
+      font-size: 25px;
+      line-height: 1;
+    }
+    .brand-mark svg { width: 100%; height: 100%; overflow: visible; }
+    .brand-name {
+      display: block;
+      color: var(--ink);
+      font-family: var(--site-font-heading);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      line-height: 1.1;
+    }
+    .brand-caption {
+      display: block;
+      margin-top: 4px;
+      color: var(--brass);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .21em;
+      text-transform: uppercase;
+    }
+    .header-actions { display: flex; align-items: center; gap: 9px; }
+    .utility-button {
+      min-height: 38px;
+      padding: 0 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid rgba(117, 94, 51, .3);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .62);
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .035em;
+      cursor: pointer;
+      transition: background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+    .utility-button:hover { background: #FFFFFF; border-color: var(--brass); transform: translateY(-1px); }
+    .utility-symbol { color: var(--brass); font-size: 15px; line-height: 1; }
+
+    .hero {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(230px, .75fr);
+      align-items: center;
+      min-height: 290px;
+      padding-block: 46px 52px;
+      gap: 28px;
+    }
+    .eyebrow {
+      margin: 0 0 16px;
+      color: var(--brass);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .24em;
+      line-height: 1.5;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      max-width: 750px;
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--site-font-heading);
+      font-size: clamp(calc(39px * var(--site-heading-scale)), calc(6.15vw * var(--site-heading-scale)), calc(72px * var(--site-heading-scale)));
+      font-weight: 500;
+      letter-spacing: -.045em;
+      line-height: .99;
+    }
+    .hero h1 em { color: var(--wine); font-weight: 500; }
+    .hero-description {
+      max-width: 600px;
+      margin: 20px 0 0;
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+    .hero-art {
+      position: relative;
+      min-height: 190px;
+      display: grid;
+      place-items: center;
+      opacity: var(--site-decoration-opacity);
+      pointer-events: none;
+    }
+    .hero-art svg { width: min(100%, 315px); height: auto; overflow: visible; }
+    .hero-edition {
+      position: absolute;
+      right: 7px;
+      bottom: -4px;
+      color: rgba(117, 94, 51, .12);
+      font-family: var(--site-font-heading);
+      font-size: 56px;
+      letter-spacing: -.04em;
+      pointer-events: none;
+    }
+
+    .metrics-shell {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--line);
+      background: light-dark(rgba(251, 249, 244, .94), rgba(28, 26, 22, .96));
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 22px rgba(40, 43, 36, .055);
+    }
+    .metrics-inner {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      padding-block: calc(15px * var(--site-spacing-scale));
+    }
+    .metric-card {
+      min-width: 0;
+      padding: 2px 20px;
+      border-right: 1px solid var(--line);
+    }
+    .metric-card:first-child { padding-left: 0; }
+    .metric-card:last-child { padding-right: 0; border-right: 0; }
+    .metric-topline { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .metric-label {
+      overflow: hidden;
+      color: light-dark(var(--ink-soft), #C5C9BD);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      line-height: 1.4;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .metric-value {
+      color: light-dark(var(--olive), #EEE8D8);
+      font-family: var(--site-font-heading);
+      font-size: 25px;
+      font-weight: 600;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+    .metric-value.negative { color: light-dark(#9C5350, #E19A91); }
+    .metric-value.positive { color: light-dark(var(--success), #9AC6A2); }
+    .metric-delta {
+      min-width: 26px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .metric-delta.up { color: var(--success); }
+    .metric-delta.down { color: var(--risk); }
+    .metric-track { height: 4px; margin-top: 8px; overflow: hidden; border-radius: 99px; background: light-dark(#E7E2D8, #40372B); }
+    .metric-fill { width: 0; height: 100%; border-radius: inherit; background: var(--site-secondary); transition: width .65s cubic-bezier(.2,.8,.2,1); }
+    .metric-footnote {
+      overflow: hidden;
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .page-content { padding-block: calc(38px * var(--site-spacing-scale)) calc(58px * var(--site-spacing-scale)); }
+    .progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 23px;
+    }
+    .progress-copy { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .round-counter {
+      padding: 7px 11px;
+      border-radius: 3px;
+      background: var(--site-secondary);
+      color: var(--site-on-secondary);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      white-space: nowrap;
+    }
+    .issue-tag {
+      overflow: hidden;
+      color: light-dark(var(--ink-soft), #C8CCBF);
+      font-size: 11px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .step-dots { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+    .step-item { display: flex; align-items: center; gap: 8px; }
+    .step-dot {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border: 1px solid light-dark(#CFC8BA, #576052);
+      border-radius: 50%;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      transition: all .2s ease;
+    }
+    .step-dot.active { border-color: var(--olive); background: var(--olive); color: #FFF9EB; box-shadow: 0 0 0 4px rgba(28,26,22,.13); }
+    .step-dot.complete { border-color: var(--site-secondary); background: var(--site-secondary); color: var(--site-on-secondary); }
+    .step-connector { width: 22px; height: 1px; background: var(--line); }
+    .step-connector.complete { background: var(--brass); }
+
+    .brief-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 17px;
+      align-items: stretch;
+    }
+    .brief-card, .evidence-card, .feedback-card, .summary-card {
+      border: 1px solid var(--line);
+      border-radius: calc(15px * var(--site-radius-scale));
+      box-shadow: var(--shadow-card);
+    }
+    .brief-card {
+      position: relative;
+      overflow: hidden;
+      padding: calc(28px * var(--site-spacing-scale)) calc(30px * var(--site-spacing-scale)) calc(25px * var(--site-spacing-scale));
+      background: light-dark(var(--paper), #24201B);
+    }
+    .brief-card::after {
+      content: "1747";
+      position: absolute;
+      right: 15px;
+      top: -28px;
+      color: light-dark(rgba(117,94,51,.08), rgba(255,206,132,.06));
+      font-family: var(--site-font-heading);
+      font-size: 116px;
+      line-height: 1;
+      pointer-events: none;
+      opacity: var(--site-decoration-opacity);
+    }
+    .brief-kicker {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 14px;
+      color: var(--brass);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    .brief-kicker::before { content: ""; width: 22px; height: 1px; background: currentColor; }
+    .brief-card h2 {
+      position: relative;
+      z-index: 1;
+      max-width: 740px;
+      margin: 0;
+      color: light-dark(var(--ink), #F2EEE4);
+      font-family: var(--site-font-heading);
+      font-size: clamp(calc(28px * var(--site-heading-scale)), calc(3.1vw * var(--site-heading-scale)), calc(40px * var(--site-heading-scale)));
+      font-weight: 600;
+      letter-spacing: -.025em;
+      line-height: 1.12;
+    }
+    .brief-context {
+      position: relative;
+      z-index: 1;
+      max-width: 790px;
+      margin: 16px 0 0;
+      color: light-dark(#53594F, #D0C7B7);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .case-question {
+      position: relative;
+      z-index: 1;
+      margin-top: 22px;
+      padding: 15px 17px;
+      border-left: 3px solid var(--site-secondary);
+      background: light-dark(#F0EBDD, #30271E);
+    }
+    .question-label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--brass);
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    .question-text {
+      margin: 0;
+      color: light-dark(var(--wine), #FFCE84);
+      font-family: var(--site-font-heading);
+      font-size: 18px;
+      font-style: italic;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+    .evidence-card {
+      padding: calc(24px * var(--site-spacing-scale)) calc(22px * var(--site-spacing-scale));
+      background: var(--site-secondary);
+      color: var(--site-on-secondary);
+      border-color: rgba(115, 89, 42, .18);
+      box-shadow: 0 12px 30px rgba(72, 56, 28, .09);
+    }
+    .evidence-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 13px;
+      border-bottom: 1px solid rgba(255,248,233,.28);
+    }
+    .evidence-heading h3 {
+      margin: 0;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .evidence-number { font-family: var(--site-font-heading); font-size: 19px; font-weight: 700; }
+    .evidence-list { display: grid; gap: 13px; margin: 16px 0 0; padding: 0; list-style: none; }
+    .evidence-list li {
+      position: relative;
+      padding-left: 13px;
+      color: rgba(255,248,233,.92);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.55;
+    }
+    .evidence-list li::before { content: ""; position: absolute; left: 0; top: .55em; width: 5px; height: 5px; border-radius: 50%; background: var(--brass-light); }
+
+    .choices-section { margin-top: calc(34px * var(--site-spacing-scale)); }
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 15px;
+    }
+    .section-kicker {
+      margin: 0 0 6px;
+      color: var(--brass);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+    .section-heading h3 {
+      margin: 0;
+      color: light-dark(var(--ink), #F1EEE4);
+      font-family: var(--site-font-heading);
+      font-size: clamp(calc(23px * var(--site-heading-scale)), calc(2.6vw * var(--site-heading-scale)), calc(31px * var(--site-heading-scale)));
+      font-weight: 600;
+      letter-spacing: -.025em;
+    }
+    .framework-note { max-width: 360px; margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; text-align: right; }
+    .choices-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(14px * var(--site-spacing-scale)); }
+    .choice-card {
+      position: relative;
+      display: flex;
+      min-height: 290px;
+      flex-direction: column;
+      align-items: stretch;
+      padding: calc(21px * var(--site-spacing-scale)) calc(20px * var(--site-spacing-scale)) calc(18px * var(--site-spacing-scale));
+      border: 1px solid var(--line);
+      border-radius: calc(12px * var(--site-radius-scale));
+      background: light-dark(var(--paper), #24201B);
+      color: inherit;
+      box-shadow: var(--shadow-card);
+      text-align: left;
+      cursor: pointer;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
+    }
+    .choice-card:not(:disabled):hover { transform: translateY(-4px); border-color: var(--brass); box-shadow: 0 16px 30px rgba(45,42,34,.1); }
+    .choice-card:disabled { cursor: default; }
+    .choice-card.is-locked { opacity: .52; }
+    .choice-card.is-selected { border-width: 2px; padding: 20px 19px 17px; }
+    .choice-card.is-optimal { border-color: var(--success); background: light-dark(#F4F8F2, #29392D); }
+    .choice-card.is-risk { border-color: var(--risk); background: light-dark(#FBF4F1, #3A2D2A); }
+    .choice-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 13px; border-bottom: 1px solid var(--line); }
+    .choice-code { color: var(--brass); font-size: 9px; font-weight: 900; letter-spacing: .16em; }
+    .choice-letter { display: grid; width: 25px; height: 25px; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); font-family: var(--site-font-heading); font-size: 13px; }
+    .choice-subtitle { margin: 17px 0 5px; color: var(--brass); font-family: var(--site-font-heading); font-size: 16px; font-style: italic; }
+    .choice-title { margin: 0; color: light-dark(var(--ink), #F0ECE1); font-family: var(--site-font-heading); font-size: calc(21px * var(--site-heading-scale)); font-weight: 600; letter-spacing: -.015em; line-height: 1.2; }
+    .choice-description { margin: 12px 0 20px; color: light-dark(#62675D, #C1C6BA); font-size: 11px; line-height: 1.7; }
+    .choice-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line); color: var(--olive-light); font-size: 9px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+    .choice-arrow { font-size: 17px; line-height: 1; }
+    .choice-card.is-selected .choice-footer { color: var(--success); }
+    .choice-card.is-risk .choice-footer { color: var(--risk); }
+
+    .feedback-card {
+      margin-top: calc(22px * var(--site-spacing-scale));
+      padding: calc(25px * var(--site-spacing-scale)) calc(27px * var(--site-spacing-scale));
+      background: light-dark(#FBF9F4, #24201B);
+      border-left: 4px solid var(--site-secondary);
+      box-shadow: var(--shadow-soft);
+      animation: appear .35s ease both;
+    }
+    .feedback-card.is-optimal { border-left-color: var(--success); }
+    .feedback-card.is-risk { border-left-color: var(--risk); }
+    .feedback-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .feedback-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 9px;
+      border-radius: 3px;
+      background: var(--success-bg);
+      color: var(--success);
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .feedback-status.risk { background: var(--risk-bg); color: var(--risk); }
+    .feedback-card h3 { margin: 10px 0 0; color: light-dark(var(--ink), #F1EEE4); font-family: var(--site-font-heading); font-size: calc(26px * var(--site-heading-scale)); font-weight: 600; line-height: 1.2; }
+    .feedback-deltas { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: 390px; }
+    .delta-chip { padding: 6px 8px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink-soft); font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .delta-chip.up { border-color: #BCD0BF; background: #EFF5EF; color: var(--success); }
+    .delta-chip.down { border-color: #E0C3BE; background: #F8EFED; color: var(--risk); }
+    .feedback-label { margin: 18px 0 8px; color: var(--brass); font-size: 9px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+    .feedback-text { max-width: 940px; margin: 0; color: light-dark(#555B51, #C6C9BE); font-size: 13px; line-height: 1.8; }
+    .feedback-bottom { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .concept-text { color: var(--muted); font-family: var(--site-font-heading); font-size: 14px; font-style: italic; }
+    .primary-button {
+      min-height: 44px;
+      padding: 0 19px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border: 1px solid var(--site-primary);
+      border-radius: 4px;
+      background: var(--site-primary);
+      color: var(--site-on-primary);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .primary-button:hover { transform: translateY(-2px); background: var(--olive-light); box-shadow: 0 9px 19px rgba(41,55,45,.18); }
+    .primary-button span:last-child { font-size: 17px; }
+
+    .summary-hero {
+      position: relative;
+      overflow: hidden;
+      padding: calc(40px * var(--site-spacing-scale));
+      border-radius: calc(16px * var(--site-radius-scale));
+      border: 1px solid #D8C28E;
+      background: #EEE4CC;
+      color: var(--ink);
+    }
+    .summary-hero::after { content: "1747"; position: absolute; right: 22px; bottom: -38px; color: rgba(117,94,51,.09); font-family: var(--site-font-heading); font-size: 170px; line-height: 1; pointer-events: none; opacity: var(--site-decoration-opacity); }
+    .summary-eyebrow { margin: 0 0 13px; color: var(--brass); font-size: 9px; font-weight: 900; letter-spacing: .2em; text-transform: uppercase; }
+    .summary-hero h2 { position: relative; z-index: 1; max-width: 850px; margin: 0; color: var(--ink); font-family: var(--site-font-heading); font-size: clamp(calc(30px * var(--site-heading-scale)), calc(4.2vw * var(--site-heading-scale)), calc(47px * var(--site-heading-scale))); font-weight: 500; letter-spacing: -.03em; line-height: 1.1; }
+    .summary-description { position: relative; z-index: 1; max-width: 780px; margin: 15px 0 0; color: var(--ink-soft); font-size: 13px; line-height: 1.75; }
+    .score-line { display: flex; align-items: center; gap: 10px; margin-top: 23px; }
+    .score-count { display: inline-grid; width: 42px; height: 42px; place-items: center; border: 1px solid var(--brass); border-radius: 50%; color: var(--brass); font-family: var(--site-font-heading); font-size: 17px; }
+    .score-caption { color: var(--ink-soft); font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .summary-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: calc(12px * var(--site-spacing-scale)); margin-top: calc(17px * var(--site-spacing-scale)); }
+    .summary-metric { padding: 18px 19px; border: 1px solid var(--line); border-radius: calc(10px * var(--site-radius-scale)); background: light-dark(var(--paper), #24201B); }
+    .summary-metric-label { color: var(--muted); font-size: 8px; font-weight: 900; letter-spacing: .12em; line-height: 1.45; text-transform: uppercase; }
+    .summary-metric-value { margin-top: 7px; color: light-dark(var(--olive), #F0EBDD); font-family: var(--site-font-heading); font-size: 30px; font-weight: 600; letter-spacing: -.025em; }
+    .summary-metric-start { margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .audit-section { margin-top: 34px; }
+    .audit-section h3 { margin: 0; color: light-dark(var(--ink), #F1EEE4); font-family: var(--site-font-heading); font-size: calc(29px * var(--site-heading-scale)); font-weight: 600; letter-spacing: -.02em; }
+    .audit-intro { margin: 6px 0 17px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .audit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(12px * var(--site-spacing-scale)); }
+    .audit-item { display: grid; grid-template-columns: 42px minmax(0,1fr); gap: 13px; padding: calc(19px * var(--site-spacing-scale)); border: 1px solid var(--line); border-radius: calc(10px * var(--site-radius-scale)); background: light-dark(var(--paper), #24201B); }
+    .audit-number { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: light-dark(#EDE7D8, #394238); color: var(--brass); font-family: var(--site-font-heading); font-size: 15px; }
+    .audit-meta { margin: 0 0 5px; color: var(--brass); font-size: 8px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
+    .audit-choice { margin: 0; color: light-dark(var(--ink), #EEEAE0); font-family: var(--site-font-heading); font-size: 18px; font-weight: 600; line-height: 1.25; }
+    .audit-concept { margin: 7px 0 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
+    .audit-verdict { display: inline-block; margin-top: 10px; padding: 5px 8px; border-radius: 3px; background: var(--success-bg); color: var(--success); font-size: 8px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+    .audit-verdict.risk { background: var(--risk-bg); color: var(--risk); }
+    .summary-actions { display: flex; justify-content: center; margin-top: 27px; }
+
+    .submission-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, .75fr) auto;
+      align-items: end;
+      gap: 14px;
+      margin-top: 18px;
+      padding: 20px 22px;
+      border: 1px solid var(--line);
+      border-radius: calc(12px * var(--site-radius-scale));
+      background: var(--paper);
+    }
+    .submission-copy h3 { margin: 0; color: var(--ink); font-family: var(--site-font-heading); font-size: 22px; font-weight: 600; }
+    .submission-copy p { margin: 5px 0 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
+    .field-label { display: block; margin-bottom: 6px; color: var(--ink-soft); font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .text-field { width: 100%; min-height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 4px; background: #FFFFFF; color: var(--ink); font: inherit; font-size: 12px; }
+    .text-field:focus { outline: 2px solid var(--brass); outline-offset: 2px; }
+    .submission-status { grid-column: 1 / -1; min-height: 15px; margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .submission-status.success { color: var(--success); }
+    .submission-status.error { color: var(--risk); }
+
+    .leaderboard-hero {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      padding: calc(30px * var(--site-spacing-scale));
+      border: 1px solid #D8C28E;
+      border-radius: calc(15px * var(--site-radius-scale));
+      background: #EEE4CC;
+    }
+    .leaderboard-hero h2 { margin: 0; color: var(--ink); font-family: var(--site-font-heading); font-size: clamp(30px, 4vw, 43px); font-weight: 600; letter-spacing: -.03em; }
+    .leaderboard-hero p { max-width: 600px; margin: 8px 0 0; color: var(--ink-soft); font-size: 12px; line-height: 1.7; }
+    .leaderboard-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 15px; }
+    .leaderboard-stat { padding: 17px 19px; border: 1px solid var(--line); border-radius: 9px; background: var(--paper); }
+    .leaderboard-stat span { display: block; color: var(--muted); font-size: 8px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .leaderboard-stat strong { display: block; margin-top: 5px; color: var(--ink); font-family: var(--site-font-heading); font-size: 29px; font-weight: 600; }
+    .leaderboard-panel { margin-top: 20px; padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); box-shadow: var(--shadow-card); }
+    .leaderboard-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
+    .leaderboard-toolbar h3 { margin: 0; color: var(--ink); font-family: var(--site-font-heading); font-size: 24px; }
+    .leaderboard-toolbar-actions { display: flex; align-items: center; gap: 9px; }
+    .secondary-button { min-height: 39px; padding: 0 13px; border: 1px solid var(--line); border-radius: 4px; background: #FFFFFF; color: var(--ink); font-size: 9px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+    .secondary-button:hover { border-color: var(--brass); background: #F7F0E2; }
+    .leaderboard-table-wrap { width: 100%; overflow-x: auto; }
+    .leaderboard-table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+    .leaderboard-table th { padding: 11px 12px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 8px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+    .leaderboard-table td { padding: 13px 12px; border-bottom: 1px solid #EAE3D7; color: var(--ink-soft); font-size: 11px; }
+    .leaderboard-table tr:last-child td { border-bottom: 0; }
+    .leaderboard-table td strong { color: var(--ink); font-weight: 800; }
+    .rank-number { display: inline-grid; width: 25px; height: 25px; place-items: center; border-radius: 50%; background: #EEE4CC; color: var(--brass); font-weight: 900; }
+    .score-badge { display: inline-block; padding: 5px 8px; border-radius: 3px; background: #EEE4CC; color: var(--brass); font-size: 9px; font-weight: 900; }
+    .details-button { border: 0; background: transparent; color: var(--wine); font-size: 10px; font-weight: 900; cursor: pointer; }
+    .leaderboard-empty { padding: 42px 16px; text-align: center; }
+    .leaderboard-empty strong { display: block; color: var(--ink); font-family: var(--site-font-heading); font-size: 22px; }
+    .leaderboard-empty p { margin: 7px auto 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .leaderboard-status { margin: 0 0 13px; color: var(--muted); font-size: 10px; }
+    .participant-detail { margin-top: 16px; padding: 19px; border: 1px solid var(--line); border-radius: 9px; background: #F4EFE5; }
+    .participant-detail h4 { margin: 0; color: var(--ink); font-family: var(--site-font-heading); font-size: 22px; }
+    .participant-detail p { color: var(--muted); font-size: 10px; }
+    .participant-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 9px; margin-top: 12px; }
+    .participant-kpi { padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: #FFFFFF; }
+    .participant-kpi span { display: block; color: var(--muted); font-size: 8px; text-transform: uppercase; }
+    .participant-kpi strong { display: block; margin-top: 4px; color: var(--ink); font-family: var(--site-font-heading); font-size: 20px; }
+    .participant-decisions { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 12px; }
+    .participant-decision { padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: #FFFFFF; }
+    .participant-decision span { display: block; color: var(--muted); font-size: 8px; font-weight: 900; text-transform: uppercase; }
+    .participant-decision strong { display: block; margin-top: 4px; color: var(--ink); font-size: 10px; line-height: 1.45; white-space: normal; }
+
+    .site-footer { border-top: 1px solid var(--line); background: light-dark(#EEE9DE, #201D18); }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: calc(19px * var(--site-spacing-scale)); }
+    .footer-brand { color: light-dark(var(--olive), #E9E3D5); font-family: var(--site-font-heading); font-size: 16px; font-style: italic; }
+    .footer-note { color: var(--muted); font-size: 9px; line-height: 1.5; text-align: right; }
+
+    @keyframes appear { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: minmax(0, 1fr) 220px; min-height: 270px; }
+      .brief-grid { grid-template-columns: minmax(0,1fr) 275px; }
+      .metric-card { padding-inline: 13px; }
+      .choice-card { min-height: 320px; padding-inline: 16px; }
+      .choice-card.is-selected { padding-inline: 15px; }
+      .choice-title { font-size: 19px; }
+    }
+    @media (max-width: 700px) {
+      .header-inner, .metrics-inner, .page-content, .footer-inner { width: min(100% - 30px, 560px); }
+      .topbar { min-height: 66px; }
+      .brand-name { font-size: 17px; }
+      .brand-caption { font-size: 8px; letter-spacing: .15em; }
+      .utility-button { width: 37px; min-width: 37px; height: 37px; padding: 0; border-radius: 50%; font-size: 0; }
+      .utility-symbol { font-size: 16px; }
+      .hero { display: block; min-height: 0; padding-block: 40px 42px; }
+      .hero h1 { max-width: 570px; font-size: clamp(42px, 12vw, 62px); }
+      .hero-description { max-width: 510px; margin-top: 15px; font-size: 12px; }
+      .hero-art { position: absolute; width: 125px; min-height: 120px; right: -8px; bottom: 10px; opacity: calc(var(--site-decoration-opacity) * .42); }
+      .hero-edition { display: none; }
+      .metrics-inner { grid-template-columns: repeat(2, minmax(0,1fr)); row-gap: 13px; padding-block: 12px; }
+      .metric-card { padding: 0 12px; }
+      .metric-card:nth-child(odd) { padding-left: 0; }
+      .metric-card:nth-child(even) { border-right: 0; }
+      .metric-card:nth-child(3), .metric-card:nth-child(4) { padding-top: 11px; border-top: 1px solid var(--line); }
+      .metric-value { font-size: 23px; }
+      .page-content { padding-block: calc(25px * var(--site-spacing-scale)) calc(42px * var(--site-spacing-scale)); }
+      .progress-row { align-items: flex-start; flex-direction: column; gap: 13px; margin-bottom: 17px; }
+      .progress-copy { width: 100%; }
+      .issue-tag { font-size: 10px; }
+      .step-dots { align-self: flex-end; }
+      .brief-grid { grid-template-columns: 1fr; gap: 10px; }
+      .brief-card { padding: 23px 20px 20px; }
+      .brief-card h2 { font-size: 30px; }
+      .brief-context { font-size: 12px; line-height: 1.75; }
+      .question-text { font-size: 17px; }
+      .evidence-card { padding: 18px 19px; }
+      .evidence-list { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 11px 16px; }
+      .evidence-list li { font-size: 10px; }
+      .choices-section { margin-top: 27px; }
+      .section-heading { align-items: flex-start; flex-direction: column; gap: 7px; }
+      .framework-note { text-align: left; }
+      .choices-grid { grid-template-columns: 1fr; gap: calc(10px * var(--site-spacing-scale)); }
+      .choice-card { min-height: 0; padding: calc(18px * var(--site-spacing-scale)); }
+      .choice-card.is-selected { padding: 17px; }
+      .choice-subtitle { margin-top: 13px; }
+      .choice-title { font-size: 21px; }
+      .choice-description { margin-bottom: 15px; }
+      .feedback-card { padding: calc(20px * var(--site-spacing-scale)) calc(18px * var(--site-spacing-scale)); }
+      .feedback-top { flex-direction: column; gap: 12px; }
+      .feedback-deltas { justify-content: flex-start; max-width: none; }
+      .feedback-card h3 { font-size: 23px; }
+      .feedback-bottom { align-items: stretch; flex-direction: column; }
+      .primary-button { width: 100%; }
+      .submission-card { grid-template-columns: 1fr; align-items: stretch; padding: 18px; }
+      .leaderboard-hero { align-items: flex-start; flex-direction: column; padding: 23px; }
+      .leaderboard-stats { gap: 8px; }
+      .leaderboard-stat { padding: 13px; }
+      .leaderboard-stat strong { font-size: 24px; }
+      .leaderboard-panel { padding: 15px; }
+      .leaderboard-toolbar { align-items: flex-start; flex-direction: column; }
+      .leaderboard-toolbar-actions { width: 100%; }
+      .leaderboard-toolbar-actions .text-field { flex: 1; min-width: 0; }
+      .participant-kpis { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .participant-decisions { grid-template-columns: 1fr; }
+      .summary-hero { padding: calc(29px * var(--site-spacing-scale)) calc(23px * var(--site-spacing-scale)); }
+      .summary-metrics { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; }
+      .summary-metric { padding: 15px; }
+      .summary-metric-value { font-size: 26px; }
+      .audit-grid { grid-template-columns: 1fr; }
+      .audit-section h3 { font-size: 26px; }
+      .footer-inner { align-items: flex-start; flex-direction: column; gap: 7px; }
+      .footer-note { text-align: left; }
+    }
+    @media (max-width: 380px) {
+      .header-inner, .metrics-inner, .page-content, .footer-inner { width: calc(100% - 24px); }
+      .brand-mark { width: 33px; height: 33px; }
+      .brand-name { font-size: 15px; }
+      .brand-caption { letter-spacing: .1em; }
+      .evidence-list { grid-template-columns: 1fr; }
+      .round-counter { padding-inline: 8px; font-size: 8px; }
+      .issue-tag { font-size: 9px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-root" id="app-root">
+    <section class="entry-gate" id="entry-gate" aria-labelledby="entry-title">
+      <div class="entry-card">
+        <div class="entry-brand">MAILLE · MAISON DEPUIS 1747</div>
+        <p class="entry-kicker">THE STRATEGY ROOM · PARTICIPANT CHECK-IN</p>
+        <h2 id="entry-title">Before you take the seat.</h2>
+        <p class="entry-description">Enter your name before beginning the four strategic decisions. Your result will be submitted under this name and displayed on the shared leaderboard.</p>
+        <form class="entry-form" id="entry-form" novalidate>
+          <label class="field-label" for="entry-name">Participant name</label>
+          <input class="text-field" id="entry-name" type="text" maxlength="40" autocomplete="nickname" placeholder="Enter your name" required />
+          <p class="entry-status" id="entry-status" role="status" aria-live="polite"></p>
+          <button class="primary-button" type="submit"><span>Enter the strategy room</span><span aria-hidden="true">→</span></button>
+        </form>
+      </div>
+    </section>
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="topbar">
+          <div class="brand-lockup" aria-label="Maison Maille, founded in 1747 in Paris">
+              <div class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 3L28 10L36 7L35 16L44 19L38 26L42 34L32 34L24 44L16 34L6 34L10 26L4 19L13 16L12 7L20 10L24 3Z" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/>
+                  <path d="M17 18L20 22L24 16L28 22L31 18L29 26H19L17 18Z" fill="currentColor" fill-opacity=".22" stroke="currentColor" stroke-width="1.1"/>
+                  <path d="M17 28H31V32C31 36 24 39 24 39C24 39 17 36 17 32V28Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+                  <path d="M21 32H27" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+                </svg>
+              </div>
+            <div>
+              <span class="brand-name">MAILLE</span>
+              <span class="brand-caption">Maison · Depuis 1747 · Paris</span>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="utility-button" type="button" id="reset-top" title="Restart simulation" aria-label="Restart simulation"><span class="utility-symbol" aria-hidden="true">↺</span><span>Reset</span></button>
+            <button class="utility-button" type="button" id="sound-toggle" title="Toggle sound cues" aria-label="Turn sound off" aria-pressed="true"><span class="utility-symbol" id="sound-symbol" aria-hidden="true">♪</span><span id="sound-label">Sound on</span></button>
+          </div>
+        </div>
+        <section class="hero" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">Don’t make it. Master it. · Brand strategy simulation · September 2016</p>
+            <h1 id="page-title">The next chapter of a <em>1747 icon.</em></h1>
+            <p class="hero-description">Take the seat of Anne-Claire Muller and make four strategic decisions to protect Maison Maille’s heritage while building a more relevant, transgenerational brand.</p>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <svg viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="160" cy="108" r="91" stroke="#755E33" stroke-opacity=".35" />
+              <circle cx="160" cy="108" r="78" stroke="#755E33" stroke-opacity=".18" stroke-dasharray="2 6" />
+              <path d="M112 68H208L201 177C200 188 191 196 180 196H140C129 196 120 188 119 177L112 68Z" fill="#FFFFFF" fill-opacity=".45" stroke="#755E33" stroke-width="1.5" />
+              <path d="M119 91H201L196 172C195 180 189 186 180 186H140C131 186 125 180 124 172L119 91Z" fill="#FFCE84" fill-opacity=".5" />
+              <path d="M108 60H212V72H108V60Z" fill="#E7D9A8" stroke="#755E33" stroke-width="1.5" />
+              <path d="M126 49H194V60H126V49Z" fill="#E7D9A8" stroke="#755E33" stroke-width="1.5" />
+              <path d="M141 111L146 116L151 106L160 114L169 106L174 116L179 111L176 121H144L141 111Z" stroke="#755E33" stroke-width="1.2" stroke-linejoin="round" />
+              <path d="M148 126H172V143H148V126Z" fill="#1C1A16" fill-opacity=".9" stroke="#755E33" stroke-width="1" />
+              <text x="160" y="138" fill="#FFCE84" font-family="Georgia, serif" font-size="9" font-weight="bold" letter-spacing="1" text-anchor="middle">MAILLE</text>
+              <path d="M45 150C61 133 69 111 64 88M64 111C48 105 40 94 38 82M64 124C78 119 86 108 91 96" stroke="#755E33" stroke-opacity=".7" stroke-width="1.2" stroke-linecap="round" />
+              <path d="M257 151C241 134 233 112 238 89M238 112C254 106 262 95 264 83M238 125C224 120 216 109 211 97" stroke="#755E33" stroke-opacity=".7" stroke-width="1.2" stroke-linecap="round" />
+              <path d="M48 89C55 89 62 96 64 104C56 106 49 100 48 89ZM37 82C44 78 54 81 59 87C53 93 43 91 37 82ZM89 95C81 92 72 96 67 103C73 109 84 105 89 95ZM263 84C256 84 239 96 238 104C246 106 262 95 263 84ZM275 82C268 78 248 82 243 87C249 93 269 91 275 82ZM211 96C219 93 230 97 235 104C229 110 216 106 211 96Z" fill="#755E33" fill-opacity=".12" stroke="#755E33" stroke-opacity=".6" stroke-width=".8" />
+              <path d="M160 16V27M160 189V202M67 108H78M242 108H253" stroke="#755E33" stroke-opacity=".5" />
+            </svg>
+          </div>
+          <div class="hero-edition">PARIS · 1747</div>
+        </section>
+      </div>
+    </header>
+
+    <section class="metrics-shell" aria-label="Live strategic indicators">
+      <div class="metrics-inner">
+        <article class="metric-card">
+          <div class="metric-topline"><span class="metric-label">Masstige prestige</span><span class="metric-delta" id="delta-prestige" hidden></span></div>
+          <div class="metric-value" id="val-prestige" aria-live="polite">85%</div>
+          <div class="metric-track"><div class="metric-fill" id="bar-prestige" style="width:85%"></div></div>
+          <p class="metric-footnote">1747 heritage · +65% price premium</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-topline"><span class="metric-label">Under-40 foodies</span><span class="metric-delta" id="delta-youth" hidden></span></div>
+          <div class="metric-value" id="val-youth" aria-live="polite">32%</div>
+          <div class="metric-track"><div class="metric-fill" id="bar-youth" style="width:32%"></div></div>
+          <p class="metric-footnote">26–49 urban epicurean recruitment</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-topline"><span class="metric-label">50+ core loyalty</span><span class="metric-delta" id="delta-core" hidden></span></div>
+          <div class="metric-value" id="val-core" aria-live="polite">88%</div>
+          <div class="metric-track"><div class="metric-fill" id="bar-core" style="width:88%"></div></div>
+          <p class="metric-footnote">Two-thirds of Maille clientele</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-topline"><span class="metric-label">Category growth</span><span class="metric-delta" id="delta-growth" hidden></span></div>
+          <div class="metric-value negative" id="val-growth" aria-live="polite">-2.3%/yr</div>
+          <div class="metric-track"><div class="metric-fill" id="bar-growth" style="width:27%"></div></div>
+          <p class="metric-footnote">€110M French mustard segment</p>
+        </article>
+      </div>
+    </section>
+
+    <main class="page-content">
+      <section id="simulator-round-view" aria-labelledby="round-title">
+        <div class="progress-row">
+          <div class="progress-copy">
+            <span class="round-counter" id="round-counter-badge">ROUND 1 OF 4</span>
+            <span class="issue-tag" id="round-issue-tag">Issue 1 · Positioning &amp; The 4 Segmentation Criteria</span>
+          </div>
+          <div class="step-dots" id="step-dots" aria-label="Simulation progress"></div>
+        </div>
+
+        <div class="brief-grid">
+          <article class="brief-card">
+            <div class="brief-kicker">The case brief · September 2016</div>
+            <h2 id="round-title">Round 1: Target Market Segmentation</h2>
+            <p class="brief-context" id="round-context"></p>
+            <div class="case-question">
+              <span class="question-label">The strategic question</span>
+              <p class="question-text" id="round-question"></p>
+            </div>
+          </article>
+          <aside class="evidence-card" aria-label="Verified case figures">
+            <div class="evidence-heading"><h3>Case evidence</h3><span class="evidence-number">01—04</span></div>
+            <ul class="evidence-list" id="round-evidence-list"></ul>
+          </aside>
+        </div>
+
+        <section class="choices-section" aria-labelledby="choices-heading">
+          <div class="section-heading">
+            <div><p class="section-kicker">Your decision</p><h3 id="choices-heading">Choose the strategic move.</h3></div>
+            <p class="framework-note" id="round-lecture-tag">Framework: Hanson &amp; Kotler Positioning + 4 Segmentation Criteria</p>
+          </div>
+          <div class="choices-grid" id="choices-grid"></div>
+        </section>
+
+        <section class="feedback-card" id="feedback-panel" hidden aria-live="polite" aria-labelledby="feedback-title">
+          <div class="feedback-top">
+            <div>
+              <span class="feedback-status" id="feedback-badge">Optimal decision</span>
+              <h3 id="feedback-title"></h3>
+            </div>
+            <div class="feedback-deltas" id="feedback-deltas"></div>
+          </div>
+          <p class="feedback-label">Lecture 4 · Theory meets the case</p>
+          <p class="feedback-text" id="feedback-text"></p>
+          <div class="feedback-bottom">
+            <span class="concept-text" id="feedback-concept-pill"></span>
+            <button class="primary-button" type="button" id="next-round-btn"><span>Proceed to next round</span><span aria-hidden="true">→</span></button>
+          </div>
+        </section>
+      </section>
+
+      <section id="simulator-summary-view" hidden aria-labelledby="final-rank-title">
+        <div class="summary-hero">
+          <p class="summary-eyebrow">Maison Maille · Strategic verdict</p>
+          <h2 id="final-rank-title">Your strategic verdict</h2>
+          <p class="summary-description" id="final-rank-desc"></p>
+          <div class="score-line"><span class="score-count" id="score-count">4/4</span><span class="score-caption">Optimal decisions</span></div>
+        </div>
+
+        <div class="summary-metrics" aria-label="Final strategic indicators">
+          <article class="summary-metric"><div class="summary-metric-label">Final masstige prestige</div><div class="summary-metric-value" id="final-prestige">96%</div><div class="summary-metric-start">Started at 85%</div></article>
+          <article class="summary-metric"><div class="summary-metric-label">Under-40 foodie reach</div><div class="summary-metric-value" id="final-youth">88%</div><div class="summary-metric-start">Started at 32%</div></article>
+          <article class="summary-metric"><div class="summary-metric-label">Core 50+ loyalty</div><div class="summary-metric-value" id="final-core">96%</div><div class="summary-metric-start">Started at 88%</div></article>
+          <article class="summary-metric"><div class="summary-metric-label">Category value growth</div><div class="summary-metric-value" id="final-growth">+3.8%/yr</div><div class="summary-metric-start">Started at -2.3%/yr</div></article>
+        </div>
+
+        <section class="submission-card" aria-labelledby="submission-heading">
+          <div class="submission-copy">
+            <h3 id="submission-heading">Add your result to the rankings.</h3>
+            <p>Your four decisions and final performance will be submitted under the participant name entered before the simulation.</p>
+          </div>
+          <div>
+            <label class="field-label" for="participant-name">Participant name</label>
+            <input class="text-field" id="participant-name" type="text" maxlength="40" readonly aria-readonly="true" placeholder="Name entered before the simulation" />
+          </div>
+          <button class="primary-button" id="submit-result" type="button"><span>Submit result</span><span aria-hidden="true">→</span></button>
+          <p class="submission-status" id="submit-status" role="status">Preview mode · connect Supabase to save results online.</p>
+        </section>
+
+        <section class="audit-section" aria-labelledby="audit-heading">
+          <h3 id="audit-heading">The decision audit.</h3>
+          <p class="audit-intro">A round-by-round review of your choices and the Lecture 4 concepts behind them.</p>
+          <div class="audit-grid" id="summary-audit-grid"></div>
+        </section>
+        <div class="summary-actions"><button class="primary-button" type="button" id="restart-final"><span>Restart for the next group</span><span aria-hidden="true">↺</span></button></div>
+      </section>
+
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">MAILLE · Maison fondée en 1747 · Paris</div>
+        <div class="footer-note">Integrated Cases in Marketing<br />Lecture 4 · Brand Positioning, Masstige &amp; Transgenerational Strategy</div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./maison_maille_supabase_connector_private.js"></script>
+  <script>
+    const roundsData = [
+      {
+        roundNumber: 1,
+        issueTag: "Issue 1 • Positioning & The 4 Segmentation Criteria",
+        lectureTag: "Framework: Hanson & Kotler Positioning + 4 Segmentation Criteria",
+        title: "Round 1: Target Market Segmentation",
+        context: "September 2016. The €110M French mustard segment is declining by 2.3% annually as younger generations eat less red meat and prefer sweet sauces. Less than 50% of adults under 25 consume mustard, whereas 88% of consumers over 50 buy it at least once a year (Exhibit 1). Two-thirds of Maille's buyers are over 50 (Exhibit 2), and 74% of traditional French gourmet consumers are over 50. Anne-Claire Muller wonders if penetrating the 40+ bracket is the only reasonable first step.",
+        evidence: [
+          "• Category Value Decline: -2.3% / year (€110M segment)",
+          "• Mustard Usage: <50% under age 25 vs. 88% over age 50",
+          "• Maille Buyer Profile: 67% (two-thirds) are aged 50+",
+          "• Urban 'Foodies': 62% aged 26–39; 28% aged 40–49"
+        ],
+        question: "« Which target customer segment should Maison Maille prioritize to rejuvenate growth without harming its 1747 heritage? »",
+        choices: [
+          {
+            id: "1A",
+            menuCode: "DÉGUSTATION A",
+            subtitle: "Demographic Caution",
+            title: "Target 40+ Consumers Only",
+            desc: "Focus strictly on consumers aged 40–49 as a cautious demographic first step to avoid stretching the Maille brand, leaving all under-40s to Amora.",
+            isOptimal: false,
+            deltas: { prestige: 1, youth: -6, core: 2, growth: -0.4 },
+            conceptUsed: "One-Dimensional Age Segmentation (Misses 62% of Foodies)",
+            feedbackTitle: "Overly Cautious: Fails to Reverse Long-Term Category Decline!",
+            feedbackText: "While mustard usage is already 82% in the 35–49 age bracket (Exhibit 1), Lecture 4 emphasizes that pure age-based segmentation is one-dimensional. Ignoring under-40s forfeits 62% of the urban 'Foodie' cohort (ages 26–39) who are actively transforming food culture, leaving Maille's long-term demographic cliff unresolved as meat consumption continues to fall."
+          },
+          {
+            id: "1B",
+            menuCode: "DÉGUSTATION B",
+            subtitle: "Mass Youth Chasing",
+            title: "Target 15–24 Fast-Food Eaters",
+            desc: "Reposition Maille as a cheap, sweet burger-and-fries condiment aimed at teenagers and university students aged 15–24.",
+            isOptimal: false,
+            deltas: { prestige: -28, youth: 8, core: -22, growth: -1.4 },
+            conceptUsed: "Violates Homogeneity, Viability & Sustainable Advantage",
+            feedbackTitle: "Severe Brand Stretch: Crashes Masstige Prestige & Core 50+ Loyalty!",
+            feedbackText: "Under Hanson (1972) and Kotler (1980), effective segmentation must satisfy Homogeneity within segments and Commercial Viability. Mass 15–24 fast-food consumers seek sweet €0.65 ketchup/burger sauces and lack the willingness to pay Maille's +65% price premium (€5.82/kg). Stretching Maille into a teen fast-food brand alienates the 50+ gourmets who generate two-thirds of your volume!"
+          },
+          {
+            id: "1C",
+            menuCode: "DÉGUSTATION C",
+            subtitle: "Psychographic 'Ageless Foodie' Segmentation",
+            title: "Target 26–49 Urban Foodies (+ 50+ Gourmets)",
+            desc: "Segment by psychographics and culinary lifestyle rather than birth year alone—targeting urban epicurean 'Foodies' (62% aged 26–39, 28% aged 40–49) who treat gourmet food as self-expression, conversational currency, and a justifiable luxury.",
+            isOptimal: true,
+            deltas: { prestige: 4, youth: 18, core: 2, growth: 1.6 },
+            conceptUsed: "Psychographic Segmentation (Satisfies All 4 Effectiveness Criteria)",
+            feedbackTitle: "Optimal Positioning: Satisfies All 4 Lecture 4 Segmentation Criteria!",
+            feedbackText: "Textbook application of Brooksbank (1994) and Kotler (1980)! Segmenting psychographically around 'Urban Foodies' satisfies all four criteria: (1) Homogeneity within (shared desire for connoisseurship, artisanal techniques, and 'Insta-worthy' conversational currency); (2) Heterogeneity between (distinct from passive ketchup users); (3) Targetability (73% trust food blogs, 63% post food photos); and (4) Commercial Viability (upper social class viewing quality food as a practical, justifiable luxury)."
+          }
+        ]
+      },
+      {
+        roundNumber: 2,
+        issueTag: "Issue 2 • Silverstein & Fiske Masstige Strategy",
+        lectureTag: "Framework: Masstige Theory (Prestige + Competitive Price + Mass-Artisanal Craft)",
+        title: "Round 2: Defending the Masstige Sweet Spot vs. Heinz",
+        context: "In June 2016, American challenger Heinz (3.9% dressings share, 26.5% penetration) launched a sweet mustard targeting Millennials with an aggressive 100% digital campaign (#howoldareyou) comparing traditional Dijon mustard to listening to music on a Walkman. In hypermarkets (Exhibit 3), Maille is priced 65% above the market average (€5.82/kg or €1.63/jar) vs. €3.60/kg (€0.54) for sister brand Amora and €1.76/kg (€0.65) for Carrefour private label.",
+        evidence: [
+          "• Maille Supermarket Price: €5.82/kg (€1.63 for 280g jar)",
+          "• Amora Supermarket Price: €3.60/kg (€0.54 for 150g jar)",
+          "• Carrefour Private Label: €1.76/kg (€0.65 for 370g jar)",
+          "• Unilever Mustard Share: 71% total (Amora 43%, Maille 28%)"
+        ],
+        question: "« How should Anne-Claire Muller defend Maille's Masstige positioning against Heinz's sweet mustard disruption? »",
+        choices: [
+          {
+            id: "2A",
+            menuCode: "DÉGUSTATION A",
+            subtitle: "Price Cut & Plastic Squeeze Format",
+            title: "Slash Price to €3.60/kg in Plastic Bottles",
+            desc: "Cut Maille's hypermarket price toward €3.60/kg and launch an American-style sweet yellow plastic squeeze bottle under the Maille name.",
+            isOptimal: false,
+            deltas: { prestige: -32, youth: 7, core: -18, growth: -1.6 },
+            conceptUsed: "Destroys Masstige Symbolism & Cut-Seed Differentiation",
+            feedbackTitle: "Masstige Collapse: Destroys Symbolic Prestige & Cannibalizes Amora!",
+            feedbackText: "In Lecture 4, Silverstein & Fiske (2003) and Paul (2018) define Masstige as combining symbolic prestige, mass-artisanal production (Maille's cut rather than crushed Brassica juncea seeds), and a modest price premium. Slashing prices and using cheap plastic squeeze bottles destroys 300 years of royal brand symbolism and directly cannibalizes Unilever's mass leader Amora (43% share)!"
+          },
+          {
+            id: "2B",
+            menuCode: "DÉGUSTATION B",
+            subtitle: "Dual-Brand Defense & Masstige Flavor Bridge",
+            title: "Flank with Amora + Scale Maille Honey Mustard",
+            desc: "Deploy sister brand Amora (43% share, ~100% digital budget) as a flanker to battle Heinz among mass youth, while scaling Maille Mustard with Honey and gourmet variants in signature glass jars at €1.63–€2.20/unit (€5.82+/kg) to bridge sweeter palates into Dijon craftsmanship.",
+            isOptimal: true,
+            deltas: { prestige: 4, youth: 14, core: 3, growth: 1.5 },
+            conceptUsed: "Masstige Sweet Spot Between Mass & Class + Portfolio Defense",
+            feedbackTitle: "Masterful Masstige Strategy: Protects the Sweet Spot Between Mass & Class!",
+            feedbackText: "Spot on! You leveraged Unilever's 71% portfolio by assigning mass youth defense to Amora (€3.60/kg) while preserving Maille's +65% price premium (€5.82/kg). Because a 280g jar of Maille costs just €1.63 (less than €1 above private label's €0.65), scaling Maille Honey Mustard (launched in mass retail in June 2017, Note 27) provides an accessible 'sweet palate bridge' into high-margin Dijon connoisseurship."
+          },
+          {
+            id: "2C",
+            menuCode: "DÉGUSTATION C",
+            subtitle: "Pure Luxury Retreat",
+            title: "Abandon Supermarkets for Boutiques Only",
+            desc: "Withdraw Maille from hypermarkets completely to protect its luxury aura and sell only €103.90–€159.20/kg fresh mustard on tap in boutiques.",
+            isOptimal: false,
+            deltas: { prestige: 9, youth: -14, core: -12, growth: -2.4 },
+            conceptUsed: "Forfeits the 'Mass' Accessibility of Masstige",
+            feedbackTitle: "Commercial Shrinkage: Sacrifices 42.9% Household Penetration!",
+            feedbackText: "Maille is a Masstige brand (like Godiva or Starbucks in Lecture 4), not an ultra-exclusive luxury brand like Rolls-Royce. Withdrawing from supermarkets forfeits Maille's 42.9% French household penetration and 8.9% total dressings value share (Exhibit 4)."
+          }
+        ]
+      },
+      {
+        roundNumber: 3,
+        issueTag: "Issue 2 • Boutique Theatre vs. Hypermarket Scale",
+        lectureTag: "Framework: Dual Distribution Halo & Experiential Touchpoints",
+        title: "Round 3: Bridging Dual Distribution",
+        context: "Maille's flagship boutiques (Paris Place de la Madeleine, Carrousel du Louvre, Bordeaux, London, NYC) grow 20% annually, where black-aproned Mustard Sommeliers serve fresh Chablis mustard on tap (28% of boutique revenue) into refillable handmade stoneware pots (€19.90–€23.90). Yet in supermarkets, many younger French shoppers view standard Dijon jars as an 'aloof', formal condiment for their grandparents' roast beef.",
+        evidence: [
+          "• Flagship Boutiques: +20% annual revenue growth; 250–600 visitors/day",
+          "• Boutique Tap Price: €159.20/kg (125g pot) & €103.90/kg (230g pot)",
+          "• Fresh Mustard on Tap: 28% of boutique sales in refillable pots",
+          "• NYC Launch Lesson: Used food trucks to avoid looking 'arrogant or aloof'"
+        ],
+        question: "« How should Maille connect its luxury boutique theatre with mass supermarkets to recruit younger foodies? »",
+        choices: [
+          {
+            id: "3A",
+            menuCode: "DÉGUSTATION A",
+            subtitle: "Channel Silos",
+            title: "Keep Boutiques & Supermarkets Separate",
+            desc: "Run the boutiques strictly as museum spaces for wealthy tourists (50% of visitors) and leave standard supermarket shelves unchanged.",
+            isOptimal: false,
+            deltas: { prestige: 0, youth: -5, core: 1, growth: -0.5 },
+            conceptUsed: "Fails to Transfer Symbolic Prestige to Mass Retail",
+            feedbackTitle: "Missed Synergy: Leaves the 'Aloof & Formal' Barrier Intact!",
+            feedbackText: "In dual distribution, selective boutiques exist to elevate brand equity and stimulate variety shopping in mass retail. Leaving supermarket shelves static fails to show younger domestic shoppers how to use Maille in modern recipes."
+          },
+          {
+            id: "3B",
+            menuCode: "DÉGUSTATION B",
+            subtitle: "Over-Extension of Luxury Rituals",
+            title: "Put €159/kg Sommelier Taps in Every Discounter",
+            desc: "Install staffed oak Chablis tap bars and black-aproned Mustard Sommeliers inside every Carrefour and hard-discount supermarket.",
+            isOptimal: false,
+            deltas: { prestige: -20, youth: 4, core: -8, growth: -1.2 },
+            conceptUsed: "Destroys Selective Scarcity & Unit Economics",
+            feedbackTitle: "Unviable Economics & Loss of Boutique Scarcity!",
+            feedbackText: "Placing €159.20/kg hand-corked stoneware taps inside hard discounters destroys the selective scarcity of Place de la Madeleine and Carrousel du Louvre while saddling Unilever with unsustainable staffing costs."
+          },
+          {
+            id: "3C",
+            menuCode: "DÉGUSTATION C",
+            subtitle: "Omnichannel Masstige Theatre & Discovery",
+            title: "QR Boutique Displays, €4.50 Trio & Food Trucks",
+            desc: "Upgrade supermarket boutique displays with QR codes linking to 30-second chef pairing videos, launch a €4.50 'Foodie Discovery Trio' mini-jar set in retail, and deploy NYC-style Maille Food Trucks & pop-up tap bars at French urban food festivals.",
+            isOptimal: true,
+            deltas: { prestige: 4, youth: 12, core: 2, growth: 1.4 },
+            conceptUsed: "Omnichannel Masstige Synergy (Warm Accessibility + Prestige)",
+            feedbackTitle: "Seamless Omnichannel Bridge: Warm Prestige Without Arrogance!",
+            feedbackText: "Just as Maille used food trucks in New York to create a warm bond and avoid being perceived as an 'arrogant or aloof French premium brand', bringing mobile tasting trucks, a €4.50 Discovery Trio, and QR-enabled boutique displays into French retail translates high-end connoisseurship into everyday kitchen trial!"
+          }
+        ]
+      },
+      {
+        roundNumber: 4,
+        issueTag: "Issue 3 • Transgenerational Positioning & Media Mix",
+        lectureTag: "Framework: Generational Cohort Theory vs. Williams & Page Transgenerational Tips",
+        title: "Round 4: Overcoming Generational Myopia",
+        context: "Despite having one of the largest advertising budgets in the dressings category in 2015, Maille invests less than 5% of its budget in digital media—whereas Amora and Heinz spend nearly 100% on digital. Meanwhile, 1 in 2 Millennials use social media while eating, 63% of people under 32 post food photos (#food has 177M Instagram posts), 73% trust food blogs for recipes, and 55% cook recipes from bloggers.",
+        evidence: [
+          "• Maille Digital Ad Spend: Less than 5% of total advertising budget",
+          "• Heinz & Amora Digital Spend: Nearly 100% of advertising budget",
+          "• Millennial Food Habits: 63% under 32 post food photos on social media",
+          "• Blogger Influence: 73% trust food blogs for recipes; 55% cook from them"
+        ],
+        question: "« How should Maille redesign its communications and media mix to build a truly Transgenerational Brand? »",
+        choices: [
+          {
+            id: "4A",
+            menuCode: "DÉGUSTATION A",
+            subtitle: "Vertical Nostalgia Only",
+            title: "Keep 95%+ Budget in Traditional TV Ads",
+            desc: "Continue spending over 95% of the budget on traditional television ads like L'Âme de la Table focused on formal family meat dinners.",
+            isOptimal: false,
+            deltas: { prestige: 1, youth: -7, core: 2, growth: -0.6 },
+            conceptUsed: "Suffers from 'Generational Myopia' (Williams & Page, 2011)",
+            feedbackTitle: "Generational Myopia: Invisible to Digital-Native Foodies!",
+            feedbackText: "While L'Âme de la Table ('Meals, Maille, Memories') provides strong Vertical transgenerational storytelling across time, Lecture 4 warns against 'Generational Myopia'—applying one generation's media habits and meat-centric dining traditions to younger cohorts who discover recipes on food blogs and Instagram."
+          },
+          {
+            id: "4B",
+            menuCode: "DÉGUSTATION B",
+            subtitle: "Juvenile Meme Pivot",
+            title: "Ditch 1747 Heritage for Slang & Prank Videos",
+            desc: "Abandon the 1747 royal identity and spend 100% of the budget on slapstick TikTok/Instagram pranks mocking older mustard eaters.",
+            isOptimal: false,
+            deltas: { prestige: -26, youth: 4, core: -28, growth: -1.8 },
+            conceptUsed: "Violates Cross-Generational Value Consistency",
+            feedbackTitle: "Severe Brand Alienation: Destroys Your 74% Gourmet Core!",
+            feedbackText: "Williams & Page (2011) stress marketing to the consistent characteristics shared across generations. Mocking heritage alienates the 50+ epicureans who represent 74% of the French gourmet market and two-thirds of Maille's sales."
+          },
+          {
+            id: "4C",
+            menuCode: "DÉGUSTATION C",
+            subtitle: "Horizontal & Vertical Transgenerational Strategy",
+            title: "Shift 30–35% to Digital Bloggers & Veggie Fusion",
+            desc: "Reallocate digital spend from <5% to 30–35%; blend vertical heritage (300 years of savoir-faire) with horizontal activation (#MaToucheMaille with food bloggers like Panier de Saison, Marmiton.com, and rising Les Tables Maille chefs) to showcase mustard as a spicy secret ingredient in vegetarian, fish, and fusion dishes.",
+            isOptimal: true,
+            deltas: { prestige: 3, youth: 14, core: 2, growth: 1.6 },
+            conceptUsed: "Horizontal + Vertical Transgenerational Positioning ('Ageless Society')",
+            feedbackTitle: "Crowning Transgenerational Triumph: Builds an 'Ageless Foodie Society'!",
+            feedbackText: "Flawless synthesis of Lecture 4! By pairing Vertical reach (300 years of L'Âme de la Table culinary emotion) with Horizontal reach (partnering with trusted food blogs where 55% of Millennials cook blogger recipes, plus young Les Tables Maille chefs reinventing vegetarian and fish dishes), you create an 'ageless society' defined by epicurean passion rather than birth year!"
+          }
+        ]
+      }
+    ];
+
+    const initialKpis = { prestige: 85, youth: 32, core: 88, growth: -2.3 };
+    let currentRoundIndex = 0;
+    let kpis = { ...initialKpis };
+    let playerHistory = [];
+    let selectedChoiceIndex = null;
+    let soundEnabled = true;
+    let audioCtx = null;
+    let lastSimulatorView = 'simulator-round-view';
+    let resultSubmitted = false;
+    let participantName = '';
+
+    const $ = (id) => document.getElementById(id);
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+    const formatSigned = (value, digits = 0) => `${value > 0 ? '+' : ''}${digits ? value.toFixed(digits) : value}`;
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!audioCtx) audioCtx = new AudioContextClass();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const settings = {
+          click: { shape: 'sine', from: 540, to: 700, duration: .07, volume: .045 },
+          optimal: { shape: 'triangle', from: 440, to: 659.25, duration: .32, volume: .07 },
+          risk: { shape: 'sawtooth', from: 290, to: 195, duration: .23, volume: .035 },
+          chime: { shape: 'sine', from: 587.33, to: 880, duration: .48, volume: .075 }
+        }[type];
+        if (!settings) return;
+        osc.type = settings.shape;
+        osc.frequency.setValueAtTime(settings.from, now);
+        osc.frequency.linearRampToValueAtTime(settings.to, now + settings.duration * .72);
+        gain.gain.setValueAtTime(settings.volume, now);
+        gain.gain.exponentialRampToValueAtTime(.001, now + settings.duration);
+        osc.start(now);
+        osc.stop(now + settings.duration);
+      } catch (_) {
+        // Audio is an optional enhancement; the simulator remains fully usable without it.
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      $('sound-symbol').textContent = soundEnabled ? '♪' : '×';
+      $('sound-label').textContent = soundEnabled ? 'Sound on' : 'Sound off';
+      $('sound-toggle').setAttribute('aria-label', soundEnabled ? 'Turn sound off' : 'Turn sound on');
+      $('sound-toggle').setAttribute('aria-pressed', String(soundEnabled));
+      if (soundEnabled) playSound('click');
+    }
+
+    function setDeltaBadge(id, value, isFloat = false) {
+      const el = $(id);
+      el.hidden = false;
+      el.className = 'metric-delta';
+      if (value > 0) el.classList.add('up');
+      if (value < 0) el.classList.add('down');
+      el.textContent = formatSigned(value, isFloat ? 1 : 0) + '%';
+    }
+
+    function updateKpiDisplay(deltas = { prestige: 0, youth: 0, core: 0, growth: 0 }, showBadges = true) {
+      kpis.prestige = clamp(kpis.prestige + deltas.prestige, 5, 100);
+      kpis.youth = clamp(kpis.youth + deltas.youth, 5, 100);
+      kpis.core = clamp(kpis.core + deltas.core, 5, 100);
+      kpis.growth = Number((kpis.growth + deltas.growth).toFixed(1));
+
+      $('val-prestige').textContent = `${kpis.prestige}%`;
+      $('bar-prestige').style.width = `${kpis.prestige}%`;
+      $('val-youth').textContent = `${kpis.youth}%`;
+      $('bar-youth').style.width = `${kpis.youth}%`;
+      $('val-core').textContent = `${kpis.core}%`;
+      $('bar-core').style.width = `${kpis.core}%`;
+
+      const growthEl = $('val-growth');
+      growthEl.textContent = `${formatSigned(kpis.growth, 1)}%/yr`;
+      growthEl.classList.toggle('negative', kpis.growth < 0);
+      growthEl.classList.toggle('positive', kpis.growth >= 0);
+      $('bar-growth').style.width = `${clamp(((kpis.growth + 5) / 10) * 100, 8, 100)}%`;
+
+      if (showBadges) {
+        setDeltaBadge('delta-prestige', deltas.prestige);
+        setDeltaBadge('delta-youth', deltas.youth);
+        setDeltaBadge('delta-core', deltas.core);
+        setDeltaBadge('delta-growth', deltas.growth, true);
+      }
+    }
+
+    function renderStepDots() {
+      const container = $('step-dots');
+      container.replaceChildren();
+      roundsData.forEach((round, index) => {
+        const item = document.createElement('div');
+        item.className = 'step-item';
+        const dot = document.createElement('span');
+        dot.className = 'step-dot';
+        if (index < currentRoundIndex) {
+          dot.classList.add('complete');
+          dot.textContent = '✓';
+        } else {
+          dot.textContent = String(index + 1);
+          if (index === currentRoundIndex) dot.classList.add('active');
+        }
+        dot.setAttribute('aria-label', `Round ${index + 1}${index < currentRoundIndex ? ', completed' : index === currentRoundIndex ? ', current' : ''}`);
+        item.append(dot);
+        if (index < roundsData.length - 1) {
+          const connector = document.createElement('span');
+          connector.className = `step-connector${index < currentRoundIndex ? ' complete' : ''}`;
+          item.append(connector);
+        }
+        container.append(item);
+      });
+    }
+
+    function renderCurrentRound() {
+      const round = roundsData[currentRoundIndex];
+      selectedChoiceIndex = null;
+      $('round-counter-badge').textContent = `ROUND ${round.roundNumber} OF ${roundsData.length}`;
+      $('round-issue-tag').textContent = round.issueTag;
+      $('round-lecture-tag').textContent = round.lectureTag;
+      $('round-title').textContent = round.title;
+      $('round-context').textContent = round.context;
+      $('round-question').textContent = round.question;
+      $('feedback-panel').hidden = true;
+      renderStepDots();
+
+      const evidenceList = $('round-evidence-list');
+      evidenceList.replaceChildren();
+      round.evidence.forEach((item) => {
+        const li = document.createElement('li');
+        li.textContent = item.replace(/^•\s*/, '');
+        evidenceList.append(li);
+      });
+
+      const choicesGrid = $('choices-grid');
+      choicesGrid.replaceChildren();
+      round.choices.forEach((choice, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'choice-card';
+        button.setAttribute('aria-label', `Option ${choice.id.slice(-1)}: ${choice.title}`);
+
+        const top = document.createElement('div');
+        top.className = 'choice-top';
+        const code = document.createElement('span');
+        code.className = 'choice-code';
+        code.textContent = choice.menuCode;
+        const letter = document.createElement('span');
+        letter.className = 'choice-letter';
+        letter.textContent = choice.id.slice(-1);
+        top.append(code, letter);
+
+        const subtitle = document.createElement('p');
+        subtitle.className = 'choice-subtitle';
+        subtitle.textContent = choice.subtitle;
+        const title = document.createElement('h4');
+        title.className = 'choice-title';
+        title.textContent = choice.title;
+        const description = document.createElement('p');
+        description.className = 'choice-description';
+        description.textContent = choice.desc;
+        const footer = document.createElement('div');
+        footer.className = 'choice-footer';
+        const footerText = document.createElement('span');
+        footerText.textContent = 'Lock in this decision';
+        const arrow = document.createElement('span');
+        arrow.className = 'choice-arrow';
+        arrow.textContent = '→';
+        arrow.setAttribute('aria-hidden', 'true');
+        footer.append(footerText, arrow);
+        button.append(top, subtitle, title, description, footer);
+        button.addEventListener('click', () => selectChoice(index));
+        choicesGrid.append(button);
+      });
+    }
+
+    function addDeltaChip(container, label, value, isFloat = false) {
+      const chip = document.createElement('span');
+      chip.className = 'delta-chip';
+      if (value > 0) chip.classList.add('up');
+      if (value < 0) chip.classList.add('down');
+      chip.textContent = `${label} ${formatSigned(value, isFloat ? 1 : 0)}%`;
+      container.append(chip);
+    }
+
+    function selectChoice(choiceIndex) {
+      if (selectedChoiceIndex !== null) return;
+      const round = roundsData[currentRoundIndex];
+      const choice = round.choices[choiceIndex];
+      if (!choice) return;
+      selectedChoiceIndex = choiceIndex;
+      playSound(choice.isOptimal ? 'optimal' : 'risk');
+
+      playerHistory.push({
+        roundNumber: round.roundNumber,
+        choiceId: choice.id,
+        issueTag: round.issueTag,
+        choiceTitle: choice.title,
+        conceptUsed: choice.conceptUsed,
+        isOptimal: choice.isOptimal
+      });
+      updateKpiDisplay(choice.deltas, true);
+
+      [...$('choices-grid').children].forEach((card, index) => {
+        card.disabled = true;
+        if (index === choiceIndex) {
+          card.classList.add('is-selected', choice.isOptimal ? 'is-optimal' : 'is-risk');
+          card.querySelector('.choice-footer span:first-child').textContent = 'Decision selected';
+          card.querySelector('.choice-arrow').textContent = '✓';
+        } else {
+          card.classList.add('is-locked');
+        }
+      });
+
+      const panel = $('feedback-panel');
+      panel.hidden = false;
+      panel.classList.toggle('is-optimal', choice.isOptimal);
+      panel.classList.toggle('is-risk', !choice.isOptimal);
+      const badge = $('feedback-badge');
+      badge.className = `feedback-status${choice.isOptimal ? '' : ' risk'}`;
+      badge.textContent = choice.isOptimal ? '✓ Optimal Lecture 4 strategy' : 'Positioning risk detected';
+      $('feedback-title').textContent = choice.feedbackTitle;
+      $('feedback-text').textContent = choice.feedbackText;
+      $('feedback-concept-pill').textContent = `Concept applied: ${choice.conceptUsed}`;
+
+      const deltas = $('feedback-deltas');
+      deltas.replaceChildren();
+      addDeltaChip(deltas, 'Prestige', choice.deltas.prestige);
+      addDeltaChip(deltas, 'Under-40', choice.deltas.youth);
+      addDeltaChip(deltas, '50+ loyalty', choice.deltas.core);
+      addDeltaChip(deltas, 'Growth', choice.deltas.growth, true);
+
+      const nextLabel = currentRoundIndex === roundsData.length - 1
+        ? 'Reveal strategic verdict'
+        : `Proceed to round ${currentRoundIndex + 2}`;
+      $('next-round-btn').querySelector('span:first-child').textContent = nextLabel;
+      window.setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 40);
+    }
+
+    function nextRound() {
+      if (selectedChoiceIndex === null) return;
+      playSound('click');
+      if (currentRoundIndex < roundsData.length - 1) {
+        currentRoundIndex += 1;
+        renderCurrentRound();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        showFinalSummary();
+      }
+    }
+
+    function createAuditItem(item) {
+      const article = document.createElement('article');
+      article.className = 'audit-item';
+      const number = document.createElement('span');
+      number.className = 'audit-number';
+      number.textContent = String(item.roundNumber).padStart(2, '0');
+      const content = document.createElement('div');
+      const meta = document.createElement('p');
+      meta.className = 'audit-meta';
+      meta.textContent = `Round ${item.roundNumber} · ${item.issueTag.split('•')[1]?.trim() || 'Strategic issue'}`;
+      const choice = document.createElement('h4');
+      choice.className = 'audit-choice';
+      choice.textContent = item.choiceTitle;
+      const concept = document.createElement('p');
+      concept.className = 'audit-concept';
+      concept.textContent = item.conceptUsed;
+      const verdict = document.createElement('span');
+      verdict.className = `audit-verdict${item.isOptimal ? '' : ' risk'}`;
+      verdict.textContent = item.isOptimal ? 'Optimal choice' : 'Strategic risk';
+      content.append(meta, choice, concept, verdict);
+      article.append(number, content);
+      return article;
+    }
+
+    function showFinalSummary() {
+      playSound('chime');
+      lastSimulatorView = 'simulator-summary-view';
+      resultSubmitted = false;
+      $('participant-name').value = participantName;
+      $('submit-result').disabled = false;
+      $('submit-status').className = 'submission-status';
+      $('submit-status').textContent = 'Preview mode · connect Supabase to save results online.';
+      $('simulator-round-view').hidden = true;
+      $('simulator-summary-view').hidden = false;
+      $('final-prestige').textContent = `${kpis.prestige}%`;
+      $('final-youth').textContent = `${kpis.youth}%`;
+      $('final-core').textContent = `${kpis.core}%`;
+      $('final-growth').textContent = `${formatSigned(kpis.growth, 1)}%/yr`;
+      $('final-growth').classList.toggle('negative', kpis.growth < 0);
+      $('final-growth').classList.toggle('positive', kpis.growth >= 0);
+
+      const optimalCount = playerHistory.filter((item) => item.isOptimal).length;
+      $('score-count').textContent = `${optimalCount}/4`;
+      if (optimalCount === 4) {
+        $('final-rank-title').textContent = 'Grand Maître Sommelier & Masstige Strategist';
+        $('final-rank-desc').textContent = 'Unanimous commendation from Unilever France! You protected Maison Maille’s 1747 royal heritage and +65% supermarket price premium while reversing the -2.3% category decline into +3.8%/yr value growth—uniting 26–49 Urban Foodies and 50+ Gourmets into an ageless epicurean society.';
+      } else if (optimalCount >= 2) {
+        $('final-rank-title').textContent = 'Chevalier of La Maison Maille';
+        $('final-rank-desc').textContent = `Strong strategic stewardship. You made ${optimalCount} of 4 optimal decisions and stabilized Maille’s market position, though certain choices created friction between boutique Masstige prestige and transgenerational recruitment. Review the audit below to see how the four pillars align.`;
+      } else {
+        $('final-rank-title').textContent = 'Royal Warrant at Risk';
+        $('final-rank-desc').textContent = `You made ${optimalCount} of 4 optimal decisions. Generational myopia or downmarket price discounting may have compromised Maille’s Masstige sweet spot and alienated its loyal 50+ clientele. Inspect the theoretical audit below and consider another attempt.`;
+      }
+
+      const audit = $('summary-audit-grid');
+      audit.replaceChildren(...playerHistory.map(createAuditItem));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetSimulator() {
+      playSound('click');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('page');
+      window.history.pushState({ page: 'simulator' }, '', url);
+      document.title = 'Maison Maille — The Strategy Room';
+      lastSimulatorView = 'simulator-round-view';
+      resultSubmitted = false;
+      participantName = '';
+      $('entry-name').value = '';
+      $('participant-name').value = '';
+      $('entry-status').textContent = '';
+      $('entry-gate').hidden = false;
+      currentRoundIndex = 0;
+      playerHistory = [];
+      kpis = { ...initialKpis };
+      updateKpiDisplay({ prestige: 0, youth: 0, core: 0, growth: 0 }, false);
+      ['delta-prestige', 'delta-youth', 'delta-core', 'delta-growth'].forEach((id) => { $(id).hidden = true; });
+      $('simulator-summary-view').hidden = true;
+      $('simulator-round-view').hidden = false;
+      renderCurrentRound();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function submitParticipantResult() {
+      const name = participantName.trim();
+      const status = $('submit-status');
+      if (name.length < 2) {
+        status.className = 'submission-status error';
+        status.textContent = 'A participant name is required. Restart and enter your name before beginning.';
+        return;
+      }
+      if (resultSubmitted) {
+        status.className = 'submission-status success';
+        status.textContent = 'This simulation has already been submitted.';
+        return;
+      }
+      if (!window.MailleResults || typeof window.MailleResults.submit !== 'function') {
+        status.className = 'submission-status error';
+        status.textContent = 'Supabase is not connected yet. Follow the setup instructions to enable online submissions.';
+        return;
+      }
+      const button = $('submit-result');
+      button.disabled = true;
+      status.className = 'submission-status';
+      status.textContent = 'Saving your result…';
+      try {
+        await window.MailleResults.submit({
+          participant_name: name,
+          decisions: playerHistory.map(item => ({ round_number: item.roundNumber, choice_id: item.choiceId }))
+        });
+        resultSubmitted = true;
+        status.className = 'submission-status success';
+        status.textContent = 'Your result has been saved successfully.';
+      } catch (error) {
+        button.disabled = false;
+        status.className = 'submission-status error';
+        status.textContent = `Your result could not be saved: ${error.message || 'Please try again.'}`;
+      }
+    }
+
+    $('reset-top').addEventListener('click', resetSimulator);
+    $('restart-final').addEventListener('click', resetSimulator);
+    $('sound-toggle').addEventListener('click', toggleSound);
+    $('next-round-btn').addEventListener('click', nextRound);
+    $('submit-result').addEventListener('click', submitParticipantResult);
+    $('entry-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const enteredName = $('entry-name').value.trim();
+      if (enteredName.length < 2) {
+        $('entry-status').textContent = 'Please enter a name with at least 2 characters.';
+        $('entry-name').focus();
+        return;
+      }
+      participantName = enteredName;
+      $('participant-name').value = participantName;
+      $('entry-status').textContent = '';
+      $('entry-gate').hidden = true;
+      $('submit-status').textContent = `Your result will be submitted as ${participantName}.`;
+      $('entry-name').blur();
+    });
+    renderCurrentRound();
+    $('entry-gate').hidden = false;
+  </script>
+</body>
+</html>
