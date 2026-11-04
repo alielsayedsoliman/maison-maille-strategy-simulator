@@ -8,13 +8,13 @@
     console.error('Maison Maille: Supabase JS did not load. Check the CDN script tag.');
     return;
   }
-
-  const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
-  const SUPABASE_PUBLISHABLE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
+  
+  const SUPABASE_URL = 'https://kabxnkhkpvowebwzpgmv.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_kR4bB1jQYpL_4BrKdbwe3g_ugCHB1qN';
 
   if (
-    SUPABASE_URL === 'YOUR_SUPABASE_PROJECT_URL' ||
-    SUPABASE_PUBLISHABLE_KEY === 'YOUR_SUPABASE_PUBLISHABLE_KEY'
+    SUPABASE_URL === 'https://kabxnkhkpvowebwzpgmv.supabase.co' ||
+    SUPABASE_PUBLISHABLE_KEY === 'sb_publishable_kR4bB1jQYpL_4BrKdbwe3g_ugCHB1qN'
   ) {
     console.warn('Maison Maille: Add your Supabase Project URL and publishable key.');
     return;
