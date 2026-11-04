@@ -1,6 +1,6 @@
 // Maison Maille Strategy Simulator — public submission-only connector
 // Include Supabase JS v2 first, then this file, before </body>.
-// Replace the two placeholders with the project's URL and PUBLISHABLE key.
+// Configure this file with the project's URL and PUBLISHABLE/anon public key.
 // Never use a secret key or service_role key in browser code.
 
 (() => {
@@ -8,15 +8,23 @@
     console.error('Maison Maille: Supabase JS did not load. Check the CDN script tag.');
     return;
   }
-  
+
   const SUPABASE_URL = 'https://kabxnkhkpvowebwzpgmv.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_kR4bB1jQYpL_4BrKdbwe3g_ugCHB1qN';
 
+  const isUnconfiguredValue = (value) => {
+    if (typeof value !== 'string') return true;
+    const trimmed = value.trim();
+    return trimmed === '' || /YOUR_|REPLACE_WITH|example\.com|your_supabase/i.test(trimmed);
+  };
+
   if (
-    SUPABASE_URL === 'https://kabxnkhkpvowebwzpgmv.supabase.co' ||
-    SUPABASE_PUBLISHABLE_KEY === 'sb_publishable_kR4bB1jQYpL_4BrKdbwe3g_ugCHB1qN'
+    isUnconfiguredValue(SUPABASE_URL) ||
+    !SUPABASE_URL.startsWith('https://') ||
+    isUnconfiguredValue(SUPABASE_PUBLISHABLE_KEY) ||
+    !SUPABASE_PUBLISHABLE_KEY.startsWith('sb_')
   ) {
-    console.warn('Maison Maille: Add your Supabase Project URL and publishable key.');
+    console.warn('Maison Maille: Add your Supabase Project URL and publishable/anon public key.');
     return;
   }
 
